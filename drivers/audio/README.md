@@ -1,19 +1,34 @@
 # Audio Core Scaffold
 
-This directory currently contains a small portable PCM byte-ring utility:
+This directory contains two portable, hardware-independent C components:
 
-- `pcm_ring.h`
-- `pcm_ring.c`
+- `pcm_ring.h/.c`: bounded byte-ring operations over caller-owned storage.
+- `stream.h/.c`: a stream lifecycle state machine for open, start, pause, resume, stop, close, and error transitions.
 
-It provides bounded read/write operations over caller-owned storage and does not allocate memory.
+They perform no hardware I/O, memory allocation, DMA, codec control, DSP communication, interrupt handling, or XNU API calls.
 
-**This is not an XNU audio driver.** It has no IOKit/AudioFamily integration, DMA support, interrupt handling, codec control, DSP communication, hardware discovery, or Moto G60-specific code. It is a host-testable building block whose eventual use in an XNU driver remains to be designed and reviewed.
+**These are not XNU audio drivers.** They are host-testable building blocks whose eventual integration into an XNU target remains to be designed and reviewed.
 
-## Concurrency and ownership
+## Stream lifecycle
 
-The ring is not internally synchronized. Callers must serialize every operation with an appropriate lock or otherwise guarantee single-threaded access. The source/destination buffers passed to read/write must not overlap the ring's backing storage. The caller owns the backing storage and must keep it valid for the ring's lifetime.
+```text
+CLOSED --open--> READY --start--> RUNNING
+                   ^                 |
+                   |                 | pause
+                   |                 v
+                   +--- stop ---- PAUSED
+                                      |
+                                      | resume
+                                      +----> RUNNING
 
-The utility copies bytes only; it does not interpret PCM formats, sample rates, channels, timestamps, or audio frames.
+READY / RUNNING / PAUSED --fail(error)--> FAILED
+FAILED --stop--> READY
+READY / FAILED --close--> CLOSED
+```
+
+Invalid transitions return an explicit error and leave the state unchanged. A failed stream retains its nonzero error code until stopped or closed.
+
+The lifecycle object is deliberately not internally synchronized. Callers must serialize operations on each instance. The current state machine is bookkeeping only: a future hardware adapter must perform actual device operations and update lifecycle state only when those operations have succeeded.
 
 ## Host tests
 
@@ -23,4 +38,4 @@ From the repository root:
 make -C tests/audio test
 ```
 
-The host test validates initialization, wraparound, bounded capacity, read/write ordering, and reset. Passing this test does not validate an XNU build or target-device audio.
+The tests cover ring-buffer behavior and stream state transitions. Passing them does not validate XNU integration or Moto G60 hardware.
