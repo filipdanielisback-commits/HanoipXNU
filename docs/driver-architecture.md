@@ -69,7 +69,7 @@ No driver may assume that a resource exists merely because a related Android con
 ## Implementation status
 
 - **Audio:** `drivers/audio/pcm_ring.c` implements a portable bounded byte ring using caller-owned storage. It does not allocate memory, interpret PCM formats, synchronize concurrent access, access hardware, or call XNU APIs. Host tests are in `tests/audio/`.
-- **Wi-Fi:** generic architecture documented in [docs/wifi-architecture.md](wifi-architecture.md); portable lifecycle state machine in [drivers/wifi/state.c](../drivers/wifi/state.c), with host tests in [tests/wifi/](../tests/wifi/). No XNU adapter, firmware loader, transport backend, packet data path, or hardware driver exists.
+- **Wi-Fi:** generic architecture documented in [docs/wifi-architecture.md](wifi-architecture.md); portable lifecycle state machine and bounded TX/RX descriptor queues exist in [drivers/wifi/](../drivers/wifi/), with lifecycle, fake-backend, and queue tests in [tests/wifi/](../tests/wifi/). The queues are bookkeeping only: no packet I/O, XNU adapter, firmware loader, transport backend, or hardware driver exists.
 - **Bluetooth:** interface design only; no code or hardware backend.
 - **XNU integration:** not started. The repository has not yet pinned a specific XNU source revision, target SDK/build environment, or driver integration model.
 
