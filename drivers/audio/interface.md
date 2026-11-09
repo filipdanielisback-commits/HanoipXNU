@@ -10,11 +10,9 @@ These are Android software configuration clues. They do **not** establish the ex
 
 ## Proposed layers
 
-1. **Audio client/API layer:** stream open/close, supported-format query, start/stop, volume/mute controls where supported.
-2. **PCM engine:** format conversion only where explicitly designed, bounded ring buffers, timestamps, underrun/overrun reporting.
-3. **XNU device adapter:** lifecycle, synchronization, interrupt-to-work handoff, DMA buffer ownership.
-4. **Codec/DSP backend:** device-specific routing and control, implemented only after exact components and protocols are verified.
-5. **Platform resource provider:** clocks, power rails, reset and interrupt resources supplied through verified platform descriptions.
+The complete control-plane/data-plane design, backend contract, stream lifecycle, DMA rules, playback/capture paths, evidence map, and implementation gates are specified in [HanoipXNU Audio Architecture](../../docs/audio-architecture.md).
+
+At a high level the layers are: client API and user-space service; XNU device adapter; generic PCM engine; audio backend contract; SoC controller, DSP and codec/amplifier backends; and verified platform resources. These are architectural boundaries, not existing implementations.
 
 ## Minimum interface contract
 
