@@ -13,7 +13,7 @@
 
 Pin `xnu-11215.1.10` as the project's **public research baseline** because it is an Apple-published XNU snapshot in the same `11215` version family as the identified iOS 18 reference kernel. This is a source-control pin for reproducible research, not a claim that this snapshot is the exact source used by a particular iOS 18 release.
 
-The identified iOS 18 beta reference is build `22A5316k`, reporting Darwin `24.0.0` and kernel version `xnu-11215.0.165.502.1~2`. The public `xnu-11215.1.10` snapshot is nearby in the 11215 generation, but its version string differs. No evidence found in this audit establishes a one-to-one source match between the public tag and that iOS build.
+The iOS 18 beta 4 record reviewed here lists build `22A5316j` and a later revised build `22A5316k`, alongside Darwin `24.0.0` and kernel version `xnu-11215.0.165.502.1~2`. The exact build-to-kernel pairing is not independently established by that record. The public `xnu-11215.1.10` snapshot is nearby in the 11215 generation, but its version string differs. No evidence found in this audit establishes a one-to-one source match between the public tag and an iOS 18 build.
 
 The newer public `xnu-12377.1.9` snapshot is a later version generation and is not selected as the iOS 18 research baseline.
 
