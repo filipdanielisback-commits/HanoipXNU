@@ -5,6 +5,7 @@ This directory contains portable, hardware-independent C components:
 - `pcm_ring.h/.c`: bounded byte-ring operations over caller-owned storage.
 - `stream.h/.c`: stream lifecycle state machine for open, start, pause, resume, stop, close, and error transitions.
 - `buffer_queue.h/.c`: bounded descriptor queue with explicit queued, in-flight, completed, and error states.
+- `engine.h/.c`: coordinator joining stream lifecycle rules to buffer submission, acquisition, completion, and release.
 
 They perform no hardware I/O, memory allocation, DMA, codec control, DSP communication, interrupt handling, locking, or XNU API calls.
 
