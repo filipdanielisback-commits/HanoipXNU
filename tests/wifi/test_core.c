@@ -142,12 +142,23 @@ test_failure_cancels_queued(void)
            HPX_WIFI_PACKET_OK);
 }
 
+static void
+test_distinct_descriptor_storage_required(void)
+{
+    struct hpx_wifi_core core;
+    struct hpx_wifi_packet slots[2];
+
+    assert(hpx_wifi_core_init(&core, slots, 1, slots, 1) ==
+           HPX_WIFI_CORE_INVALID_ARGUMENT);
+}
+
 int
 main(void)
 {
     test_lifecycle_gates_and_packet_flow();
     test_stop_cancels_queued_and_waits_for_drain();
     test_failure_cancels_queued();
+    test_distinct_descriptor_storage_required();
     puts("wifi core coordinator tests: ok");
     return 0;
 }
