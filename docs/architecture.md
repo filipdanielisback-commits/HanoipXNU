@@ -22,3 +22,10 @@ XNU is a kernel, not the complete iOS operating system. A functioning iOS enviro
 - Which required kernel subsystems depend on Apple-specific hardware or interfaces?
 - What portions of the device hardware can be documented from public sources?
 - Is a useful emulator-based proof of concept possible before any phone testing?
+
+
+## Source-tree architecture
+
+HanoipXNU now separates the public XNU baseline and project-authored patches (`xnu/`), generic kernel notes (`kernel/`), architecture/SoC adaptation (`platform/`), device-specific facts (`devices/motorola/hanoip/`), project-owned configuration plans (`configs/`), drivers, boot integration, build tools, emulator work, and userland. This is an original organization inspired by common OS-porting practice and reviewed HakiOS documentation; it does not copy HakiOS implementation files or patches.
+
+The public XNU revision is not pinned yet. A Darwin 24/iOS 18 compatibility target is a research objective, not an established exact source match. See [the XNU revision record](../xnu/REVISION.md).
