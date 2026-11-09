@@ -259,7 +259,8 @@ The caller must serialize access and call completion functions only after backen
 | Exact target host transport | Unresolved |
 | Firmware/calibration contract | Unresolved |
 | Generic Wi-Fi architecture | **Documented in this proposal** |
-| Generic Wi-Fi lifecycle state machine | Implemented; host tests added |\n| Packet queues and mock data-path tests | Not implemented |
+| Generic Wi-Fi lifecycle state machine | Implemented; host tests added |
+| Packet queues and mock data-path tests | Not implemented |
 | XNU network adapter | Not implemented |
 | Hanoip transport/backend | Not implemented |
 | Working Wi-Fi on HanoipXNU | **Not implemented or tested** |
