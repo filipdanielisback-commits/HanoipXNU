@@ -39,7 +39,7 @@ Exact hardware revisions, firmware versions, boot configuration, and partition l
 
 HanoipXNU is an operating-system porting and platform research effort. XNU source availability does not provide the complete iOS operating system. iOS also depends on proprietary frameworks, services, signing infrastructure, and hardware-specific components that are not supplied by the open-source XNU repository.
 
-Accordingly, this project does **not** claim to be an iOS 18 port. Any future Darwin-compatible experiment must be described accurately and must respect the licenses and distribution restrictions of every component.
+Accordingly, this project does **not** claim to be an iOS 18 port. Any future Darwin-compatible experiment must be described accurately and must respect the licenses and distribution restrictions of every component. The public Apple XNU source is now being evaluated as the real kernel baseline; no exact iOS 18 source match or reproducible XNU build has been established yet. See [XNU revision record](xnu/REVISION.md).
 
 ## Repository layout
 
@@ -49,13 +49,17 @@ HanoipXNU/
 ├── ROADMAP.md
 ├── CONTRIBUTING.md
 ├── SECURITY.md
-├── docs/                  # Architecture, requirements, and research notes
-├── drivers/               # Proposed XNU-facing driver interfaces (design only)
-├── kernel/                # XNU source integration notes and patches
+├── xnu/                   # Upstream XNU revision record and HanoipXNU patches
+├── kernel/                # Kernel integration notes
+├── platform/              # ARM64 and Qualcomm platform research
+├── configs/               # Project-owned build configuration plans
+├── drivers/               # Portable core and proposed XNU-facing drivers
 ├── bootloader/            # Boot-chain research and experiments
-├── devices/motorola/hanoip/
-│   └── README.md          # Device-specific research
+├── devices/motorola/hanoip/ # Device-specific research
 ├── build/                 # Reproducible build tooling
+├── tools/                 # Source and build research tools
+├── qemu/                  # Future emulator experiments
+├── sysimage/              # Future local image-layout research
 ├── tests/                 # Test plans and results
 └── userland/              # Userspace research
 ```
