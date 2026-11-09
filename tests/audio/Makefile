@@ -27,7 +27,7 @@ $(ENGINE_TEST): test_engine.c $(AUDIO_DIR)/engine.c $(AUDIO_DIR)/engine.h $(AUDI
 $(FORMAT_TEST): test_format.c $(AUDIO_DIR)/format.c $(AUDIO_DIR)/format.h
 	$(CC) $(CFLAGS) -I$(AUDIO_DIR) $(AUDIO_DIR)/format.c test_format.c -o $(FORMAT_TEST)
 
-test: $(RING_TEST) $(STREAM_TEST) $(QUEUE_TEST) $(ENGINE_TEST) $(FORMAT_TEST) $(FORMAT_TEST)
+test: $(RING_TEST) $(STREAM_TEST) $(QUEUE_TEST) $(ENGINE_TEST) $(FORMAT_TEST)
 	./$(RING_TEST)
 	./$(STREAM_TEST)
 	./$(QUEUE_TEST)
@@ -35,4 +35,4 @@ test: $(RING_TEST) $(STREAM_TEST) $(QUEUE_TEST) $(ENGINE_TEST) $(FORMAT_TEST) $(
 	./$(FORMAT_TEST)
 
 clean:
-	rm -f $(RING_TEST) $(STREAM_TEST) $(QUEUE_TEST) $(ENGINE_TEST)
+	rm -f $(RING_TEST) $(STREAM_TEST) $(QUEUE_TEST) $(ENGINE_TEST) $(FORMAT_TEST)
