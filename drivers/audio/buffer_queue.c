@@ -12,22 +12,29 @@ hpx_audio_make_ticket(uint32_t generation, size_t index)
     return ((uint64_t)generation << 32) | (uint32_t)index;
 }
 
-static struct hpx_audio_buffer *
-hpx_audio_find_ticket(struct hpx_audio_buffer_queue *queue, uint64_t ticket)
+static const struct hpx_audio_buffer *
+hpx_audio_find_ticket_const(const struct hpx_audio_buffer_queue *queue,
+                            uint64_t ticket)
 {
     uint32_t index = (uint32_t)(ticket & UINT32_MAX);
     uint32_t generation = (uint32_t)(ticket >> 32);
-    struct hpx_audio_buffer *slot;
+    const struct hpx_audio_buffer *slot;
 
     if (generation == 0 || (size_t)index >= queue->capacity) {
         return 0;
     }
-
     slot = &queue->slots[index];
     if (slot->ticket != ticket || slot->state == HPX_AUDIO_BUFFER_FREE) {
         return 0;
     }
     return slot;
+}
+
+static struct hpx_audio_buffer *
+hpx_audio_find_ticket(struct hpx_audio_buffer_queue *queue, uint64_t ticket)
+{
+    return (struct hpx_audio_buffer *)
+        hpx_audio_find_ticket_const(queue, ticket);
 }
 
 int
@@ -41,7 +48,6 @@ hpx_audio_buffer_queue_init(struct hpx_audio_buffer_queue *queue,
         capacity > (size_t)UINT32_MAX) {
         return HPX_AUDIO_QUEUE_INVALID_ARGUMENT;
     }
-
     queue->slots = slots;
     queue->capacity = capacity;
     queue->queued_count = 0;
@@ -59,7 +65,6 @@ hpx_audio_buffer_queue_init(struct hpx_audio_buffer_queue *queue,
         slots[i].state = HPX_AUDIO_BUFFER_FREE;
         slots[i].completion_status = 0;
     }
-
     return HPX_AUDIO_QUEUE_OK;
 }
 
@@ -69,8 +74,7 @@ hpx_audio_buffer_submit(struct hpx_audio_buffer_queue *queue,
                         size_t length,
                         uint64_t *ticket_out)
 {
-    size_t offset;
-    size_t i;
+    size_t offset, i;
     struct hpx_audio_buffer *slot;
     uint32_t generation;
 
@@ -89,12 +93,10 @@ hpx_audio_buffer_submit(struct hpx_audio_buffer_queue *queue,
         if (slot->state != HPX_AUDIO_BUFFER_FREE) {
             continue;
         }
-
         generation = queue->next_generation++;
         if (generation == 0) {
             generation = queue->next_generation++;
         }
-
         slot->data = data;
         slot->length = length;
         slot->bytes_transferred = 0;
@@ -106,7 +108,6 @@ hpx_audio_buffer_submit(struct hpx_audio_buffer_queue *queue,
         *ticket_out = slot->ticket;
         return HPX_AUDIO_QUEUE_OK;
     }
-
     return HPX_AUDIO_QUEUE_FULL;
 }
 
@@ -116,8 +117,7 @@ hpx_audio_buffer_acquire(struct hpx_audio_buffer_queue *queue,
                          void **data_out,
                          size_t *length_out)
 {
-    size_t offset;
-    size_t i;
+    size_t offset, i;
     struct hpx_audio_buffer *slot;
 
     if (!hpx_audio_queue_valid(queue) || ticket_out == 0 ||
@@ -127,14 +127,12 @@ hpx_audio_buffer_acquire(struct hpx_audio_buffer_queue *queue,
     if (queue->queued_count == 0) {
         return HPX_AUDIO_QUEUE_EMPTY;
     }
-
     for (offset = 0; offset < queue->capacity; ++offset) {
         i = (queue->dispatch_cursor + offset) % queue->capacity;
         slot = &queue->slots[i];
         if (slot->state != HPX_AUDIO_BUFFER_QUEUED) {
             continue;
         }
-
         slot->state = HPX_AUDIO_BUFFER_IN_FLIGHT;
         queue->queued_count--;
         queue->in_flight_count++;
@@ -144,7 +142,6 @@ hpx_audio_buffer_acquire(struct hpx_audio_buffer_queue *queue,
         *length_out = slot->length;
         return HPX_AUDIO_QUEUE_OK;
     }
-
     return HPX_AUDIO_QUEUE_EMPTY;
 }
 
@@ -159,7 +156,6 @@ hpx_audio_buffer_complete(struct hpx_audio_buffer_queue *queue,
     if (!hpx_audio_queue_valid(queue)) {
         return HPX_AUDIO_QUEUE_INVALID_ARGUMENT;
     }
-
     slot = hpx_audio_find_ticket(queue, ticket);
     if (slot == 0) {
         return HPX_AUDIO_QUEUE_STALE_TICKET;
@@ -170,13 +166,40 @@ hpx_audio_buffer_complete(struct hpx_audio_buffer_queue *queue,
     if (bytes_transferred > slot->length) {
         return HPX_AUDIO_QUEUE_INVALID_ARGUMENT;
     }
-
     slot->bytes_transferred = bytes_transferred;
     slot->completion_status = completion_status;
     slot->state = completion_status == 0 ?
                   HPX_AUDIO_BUFFER_COMPLETE : HPX_AUDIO_BUFFER_ERROR;
     queue->in_flight_count--;
     queue->completed_count++;
+    return HPX_AUDIO_QUEUE_OK;
+}
+
+int
+hpx_audio_buffer_get_completion(
+    const struct hpx_audio_buffer_queue *queue,
+    uint64_t ticket,
+    enum hpx_audio_buffer_state *state_out,
+    size_t *bytes_transferred_out,
+    int *completion_status_out)
+{
+    const struct hpx_audio_buffer *slot;
+
+    if (!hpx_audio_queue_valid(queue) || state_out == 0 ||
+        bytes_transferred_out == 0 || completion_status_out == 0) {
+        return HPX_AUDIO_QUEUE_INVALID_ARGUMENT;
+    }
+    slot = hpx_audio_find_ticket_const(queue, ticket);
+    if (slot == 0) {
+        return HPX_AUDIO_QUEUE_STALE_TICKET;
+    }
+    if (slot->state != HPX_AUDIO_BUFFER_COMPLETE &&
+        slot->state != HPX_AUDIO_BUFFER_ERROR) {
+        return HPX_AUDIO_QUEUE_INVALID_STATE;
+    }
+    *state_out = slot->state;
+    *bytes_transferred_out = slot->bytes_transferred;
+    *completion_status_out = slot->completion_status;
     return HPX_AUDIO_QUEUE_OK;
 }
 
@@ -189,7 +212,6 @@ hpx_audio_buffer_release(struct hpx_audio_buffer_queue *queue,
     if (!hpx_audio_queue_valid(queue)) {
         return HPX_AUDIO_QUEUE_INVALID_ARGUMENT;
     }
-
     slot = hpx_audio_find_ticket(queue, ticket);
     if (slot == 0) {
         return HPX_AUDIO_QUEUE_STALE_TICKET;
@@ -198,7 +220,6 @@ hpx_audio_buffer_release(struct hpx_audio_buffer_queue *queue,
         slot->state != HPX_AUDIO_BUFFER_ERROR) {
         return HPX_AUDIO_QUEUE_INVALID_STATE;
     }
-
     slot->data = 0;
     slot->length = 0;
     slot->bytes_transferred = 0;
