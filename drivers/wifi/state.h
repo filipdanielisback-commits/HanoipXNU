@@ -53,16 +53,19 @@ int hpx_wifi_detach(struct hpx_wifi_state_data *wifi);
 int hpx_wifi_scan_begin(struct hpx_wifi_state_data *wifi,
                         unsigned int request_id);
 int hpx_wifi_scan_complete(struct hpx_wifi_state_data *wifi,
-                           unsigned int request_id, int result);
+                           unsigned int generation, unsigned int request_id,
+                           int result);
 
 /* Connection lifecycle. Success must represent a confirmed backend event. */
 int hpx_wifi_connect_begin(struct hpx_wifi_state_data *wifi,
                            unsigned int request_id);
 int hpx_wifi_connect_complete(struct hpx_wifi_state_data *wifi,
-                              unsigned int request_id, int result);
+                              unsigned int generation, unsigned int request_id,
+                              int result);
 int hpx_wifi_disconnect_begin(struct hpx_wifi_state_data *wifi,
                               unsigned int request_id);
 int hpx_wifi_disconnect_complete(struct hpx_wifi_state_data *wifi,
+                                 unsigned int generation,
                                  unsigned int request_id, int result);
 
 /* Suspend/resume are state-only; backend must confirm each operation. */
