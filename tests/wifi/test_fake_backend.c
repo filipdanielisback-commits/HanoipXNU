@@ -42,9 +42,10 @@ fake_backend_initialize(struct fake_backend *backend)
     }
 
     if (backend->init_result != 0) {
-        return hpx_wifi_fail(&backend->wifi, backend->init_result);
+        return hpx_wifi_fail(&backend->wifi, backend->wifi.generation,
+                            backend->init_result);
     }
-    return hpx_wifi_mark_ready(&backend->wifi);
+    return hpx_wifi_mark_ready(&backend->wifi, backend->wifi.generation);
 }
 
 static int
