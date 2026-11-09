@@ -94,10 +94,23 @@ hpx_audio_engine_close(struct hpx_audio_engine *engine)
 int
 hpx_audio_engine_fail(struct hpx_audio_engine *engine, int error_code)
 {
+    size_t cancelled;
+    int result;
+
     if (!hpx_audio_engine_valid(engine)) {
         return HPX_AUDIO_ENGINE_INVALID_ARGUMENT;
     }
-    return hpx_audio_stream_fail(&engine->stream, error_code);
+    result = hpx_audio_stream_fail(&engine->stream, error_code);
+    if (result != HPX_AUDIO_STREAM_OK) {
+        return result;
+    }
+    /*
+     * Queued buffers cannot be acquired after failure. Complete them as
+     * errors so callers can inspect and release them instead of deadlocking
+     * shutdown. Already in-flight buffers must still report completion.
+     */
+    return hpx_audio_buffer_cancel_queued(engine->queue, error_code,
+                                          &cancelled);
 }
 
 int
