@@ -129,13 +129,14 @@ hpx_wifi_scan_begin(struct hpx_wifi_state_data *wifi,
 
 int
 hpx_wifi_scan_complete(struct hpx_wifi_state_data *wifi,
-                       unsigned int request_id, int result)
+                       unsigned int generation, unsigned int request_id,
+                       int result)
 {
     if (!hpx_wifi_valid(wifi) || !hpx_wifi_request_valid(request_id)) {
         return HPX_WIFI_INVALID_ARGUMENT;
     }
     if (wifi->state != HPX_WIFI_SCANNING ||
-        wifi->pending_request != request_id) {
+        wifi->generation != generation || wifi->pending_request != request_id) {
         return HPX_WIFI_INVALID_STATE;
     }
 
@@ -164,13 +165,14 @@ hpx_wifi_connect_begin(struct hpx_wifi_state_data *wifi,
 
 int
 hpx_wifi_connect_complete(struct hpx_wifi_state_data *wifi,
-                          unsigned int request_id, int result)
+                          unsigned int generation, unsigned int request_id,
+                          int result)
 {
     if (!hpx_wifi_valid(wifi) || !hpx_wifi_request_valid(request_id)) {
         return HPX_WIFI_INVALID_ARGUMENT;
     }
     if (wifi->state != HPX_WIFI_CONNECTING ||
-        wifi->pending_request != request_id) {
+        wifi->generation != generation || wifi->pending_request != request_id) {
         return HPX_WIFI_INVALID_STATE;
     }
 
@@ -199,13 +201,14 @@ hpx_wifi_disconnect_begin(struct hpx_wifi_state_data *wifi,
 
 int
 hpx_wifi_disconnect_complete(struct hpx_wifi_state_data *wifi,
+                             unsigned int generation,
                              unsigned int request_id, int result)
 {
     if (!hpx_wifi_valid(wifi) || !hpx_wifi_request_valid(request_id)) {
         return HPX_WIFI_INVALID_ARGUMENT;
     }
     if (wifi->state != HPX_WIFI_DISCONNECTING ||
-        wifi->pending_request != request_id) {
+        wifi->generation != generation || wifi->pending_request != request_id) {
         return HPX_WIFI_INVALID_STATE;
     }
 
