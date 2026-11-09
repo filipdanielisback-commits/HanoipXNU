@@ -13,3 +13,6 @@ Before importing or adapting upstream code:
 - Do not treat macOS driver APIs as automatically available in a standalone or embedded XNU environment.
 
 Portable host-side utilities may be developed and tested independently, but they are not XNU kernel drivers until explicitly integrated and built against the selected XNU target.
+
+
+The upstream integration layout now lives in [`../xnu/`](../xnu/README.md), with a revision-selection record in [`../xnu/REVISION.md`](../xnu/REVISION.md). Keep generic kernel research here and keep upstream provenance plus project-authored XNU patches separate.
