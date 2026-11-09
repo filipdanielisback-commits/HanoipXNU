@@ -1,6 +1,6 @@
 # HanoipXNU Driver Architecture (Phase 2)
 
-**Status:** Audio and Wi-Fi architecture proposals documented; portable audio utilities and a hardware-independent Wi-Fi lifecycle state machine with fake-backend tests exist. No XNU driver adapter or Moto G60 hardware driver has been implemented.
+**Status:** Audio and Wi-Fi architecture proposals documented; portable audio utilities and a hardware-independent Wi-Fi lifecycle state machine plus bounded Wi-Fi packet descriptor queues and host tests exist. No packet I/O, XNU driver adapter, or Moto G60 hardware driver has been implemented.
 
 This document defines the architecture for investigating audio, Wi-Fi, and Bluetooth support on the Motorola Moto G60 (XT2135-2, `hanoip`). Exact hardware components and some transports remain unknown.
 
