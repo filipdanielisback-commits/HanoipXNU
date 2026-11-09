@@ -59,8 +59,8 @@ fake_backend_scan(struct fake_backend *backend, unsigned int request_id,
     }
 
     /* The fake backend supplies an explicit completion, not a fake success. */
-    return hpx_wifi_scan_complete(&backend->wifi, request_id,
-                                  completion_result);
+    return hpx_wifi_scan_complete(&backend->wifi, backend->wifi.generation,
+                                  request_id, completion_result);
 }
 
 int
