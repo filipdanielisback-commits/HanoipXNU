@@ -9,7 +9,7 @@ This directory contains proposed XNU-facing driver interface specifications for 
 - [End-to-end audio architecture](../docs/audio-architecture.md)
 - [Audio interface proposal](audio/interface.md)
 - [Wi-Fi architecture](../docs/wifi-architecture.md)
-- [Wi-Fi portable core, packet queues, and tests](wifi/README.md)
+- [Wi-Fi portable core coordinator, packet queues, and tests](wifi/README.md)
 - [Wi-Fi interface proposal](wifi/interface.md)
 - [Bluetooth interface proposal](bluetooth/interface.md)
 - [Overall architecture and implementation gates](../docs/driver-architecture.md)
