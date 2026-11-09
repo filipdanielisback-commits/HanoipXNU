@@ -29,7 +29,7 @@ main(void)
     assert(hpx_wifi_state_init(&wifi) == HPX_WIFI_OK);
     expect_state(&wifi, HPX_WIFI_ABSENT, 0U, 0U, 0);
 
-    assert(hpx_wifi_mark_ready(&wifi) == HPX_WIFI_INVALID_STATE);
+    assert(hpx_wifi_mark_ready(&wifi, 1U) == HPX_WIFI_INVALID_STATE);
     assert(hpx_wifi_discover(&wifi) == HPX_WIFI_OK);
     expect_state(&wifi, HPX_WIFI_DISCOVERED, 1U, 0U, 0);
     assert(hpx_wifi_discover(&wifi) == HPX_WIFI_INVALID_STATE);
@@ -55,10 +55,10 @@ main(void)
 
     assert(hpx_wifi_suspend_begin(&wifi) == HPX_WIFI_OK);
     expect_state(&wifi, HPX_WIFI_SUSPENDING, 1U, 0U, 0);
-    assert(hpx_wifi_suspend_complete(&wifi, 0) == HPX_WIFI_OK);
+    assert(hpx_wifi_suspend_complete(&wifi, 1U, 0) == HPX_WIFI_OK);
     expect_state(&wifi, HPX_WIFI_SUSPENDED, 1U, 0U, 0);
     assert(hpx_wifi_resume_begin(&wifi) == HPX_WIFI_OK);
-    assert(hpx_wifi_resume_complete(&wifi, 0) == HPX_WIFI_OK);
+    assert(hpx_wifi_resume_complete(&wifi, 1U, 0) == HPX_WIFI_OK);
     expect_state(&wifi, HPX_WIFI_LINK_UP, 1U, 0U, 0);
 
     assert(hpx_wifi_disconnect_begin(&wifi, 30U) == HPX_WIFI_OK);
@@ -69,12 +69,12 @@ main(void)
     expect_state(&wifi, HPX_WIFI_READY, 1U, 0U, 0);
 
     assert(hpx_wifi_suspend_begin(&wifi) == HPX_WIFI_OK);
-    assert(hpx_wifi_suspend_complete(&wifi, -9) == HPX_WIFI_OK);
+    assert(hpx_wifi_suspend_complete(&wifi, 1U, -9) == HPX_WIFI_OK);
     expect_state(&wifi, HPX_WIFI_READY, 1U, 0U, -9);
 
-    assert(hpx_wifi_fail(&wifi, -42) == HPX_WIFI_OK);
+    assert(hpx_wifi_fail(&wifi, 1U, -42) == HPX_WIFI_OK);
     expect_state(&wifi, HPX_WIFI_FAILED, 1U, 0U, -42);
-    assert(hpx_wifi_fail(&wifi, -43) == HPX_WIFI_INVALID_STATE);
+    assert(hpx_wifi_fail(&wifi, 1U, -43) == HPX_WIFI_INVALID_STATE);
     assert(hpx_wifi_begin_stop(&wifi) == HPX_WIFI_OK);
     assert(hpx_wifi_detach(&wifi) == HPX_WIFI_OK);
     expect_state(&wifi, HPX_WIFI_ABSENT, 1U, 0U, 0);
