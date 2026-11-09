@@ -1,6 +1,6 @@
 # HanoipXNU Wi-Fi Architecture
 
-**Status:** Architecture proposal; design only. No XNU Wi-Fi driver, firmware loader, network interface, or hardware backend is implemented.
+**Status:** Architecture proposal plus portable lifecycle state machine and fake-backend host tests. No XNU Wi-Fi driver, firmware loader, network interface, or hardware backend is implemented.
 **Target:** Motorola Moto G60 XT2135-2 (`hanoip`)
 **Review date:** 2026-11-09
 
@@ -243,7 +243,13 @@ A host-side mock test does not prove that the XNU adapter compiles or that the t
 
 No gate is considered passed by documentation alone. No phone flashing or device-side experiment is part of the current milestone.
 
-## 12. Current status
+## 12. Portable core implemented
+
+The first hardware-independent slice is implemented in `drivers/wifi/state.h` and `drivers/wifi/state.c`. It models discovery, initialization, ready, scan, connection, link, disconnect, suspend/resume, failure, stop, and detach. Scan/connect/disconnect completions require both a request ID and the current device-generation token, so stale asynchronous completions from a previous attachment are rejected.
+
+The caller must serialize access and call completion functions only after backend confirmation. The module performs no I/O, allocation, locking, firmware loading, packet transfer, or XNU calls. Deterministic tests live in `tests/wifi/` and run with `make -C tests/wifi test`; they test the portable logic only, not a real backend or hardware.
+
+## 13. Current status
 
 | Component | Status |
 |---|---|
@@ -253,7 +259,7 @@ No gate is considered passed by documentation alone. No phone flashing or device
 | Exact target host transport | Unresolved |
 | Firmware/calibration contract | Unresolved |
 | Generic Wi-Fi architecture | **Documented in this proposal** |
-| Generic Wi-Fi code and mock tests | Not implemented |
+| Generic Wi-Fi lifecycle state machine | Implemented; host tests added |\n| Packet queues and mock data-path tests | Not implemented |
 | XNU network adapter | Not implemented |
 | Hanoip transport/backend | Not implemented |
 | Working Wi-Fi on HanoipXNU | **Not implemented or tested** |
