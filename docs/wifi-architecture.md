@@ -260,7 +260,7 @@ The caller must serialize access and call completion functions only after backen
 | Firmware/calibration contract | Unresolved |
 | Generic Wi-Fi architecture | **Documented in this proposal** |
 | Generic Wi-Fi lifecycle state machine | Implemented; host tests added |
-| Packet queues and mock data-path tests | Not implemented |
+| Bounded packet descriptor queues | Implemented as portable bookkeeping primitives; no packet I/O |
 | XNU network adapter | Not implemented |
 | Hanoip transport/backend | Not implemented |
 | Working Wi-Fi on HanoipXNU | **Not implemented or tested** |
@@ -277,3 +277,12 @@ The caller must serialize access and call completion functions only after backen
 - [Apple XNU source](https://github.com/apple-oss-distributions/xnu)
 
 These references support research and architectural boundaries only. They do not demonstrate a working XNU driver or target-device support.
+
+
+## 14. Portable bounded packet-queue slice
+
+`drivers/wifi/packet_queue.h` and `packet_queue.c` add caller-owned, fixed-capacity TX and RX descriptor queues. Each descriptor moves through FREE, QUEUED, IN_FLIGHT, then COMPLETE or ERROR. The backend acquires queued descriptors in ticket order, and completion must match both the ticket and the device-generation token. A descriptor remains occupied until the caller reads its completion and releases it. Queued work can be cancelled into an error state; in-flight work is not assumed to have stopped.
+
+The caller retains ownership of the actual buffer allocation and must keep it valid until release. The queue performs no allocation, copying, freeing, DMA mapping, locking, packet parsing, or I/O. TX and RX use separate queue instances. The caller serializes access. Tickets are monotonic within a queue initialization; queue reinitialization requires prior callbacks to be quiesced, and a new attachment must use a new device generation.
+
+The deterministic packet-queue test covers FIFO acquisition, capacity/back-pressure, invalid arguments and lengths, completion matching, duplicate and stale completion rejection, cancellation, and release. Run it with the existing tests using `make -C tests/wifi test`. These tests validate only queue bookkeeping; they do not prove a packet data path, XNU integration, transport compatibility, or target hardware operation.
