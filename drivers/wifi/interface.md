@@ -37,7 +37,7 @@ This is evidence of a Qualcomm WLAN software path in the Android/Linux ecosystem
 
 ## Implemented portable core and tests
 
-`state.h` and `state.c` provide an allocation-free lifecycle state machine for discovery, initialization, ready, scan, connect, link, disconnect, suspend/resume, failure, stop, and detach. Async scan/connect/disconnect completions are checked against both a nonzero request ID and the current device generation to reject stale events. The caller must serialize access and invoke transitions only after backend confirmation.
+`state.h` and `state.c` provide an allocation-free lifecycle state machine for discovery, initialization, ready, scan, connect, link, disconnect, suspend/resume, failure, stop, and detach. Initialization, fatal-error, scan/connect/disconnect, and suspend/resume completions are checked against the current device generation; scan/connect/disconnect also require a matching nonzero request ID. This rejects stale events from a previous attachment. The caller must serialize access and invoke transitions only after backend confirmation.
 
 `tests/wifi/test_state.c` and `tests/wifi/test_fake_backend.c` exercise state transitions and deterministic backend outcomes. Run them with `make -C tests/wifi test`. These tests do not validate a chipset, transport, firmware, XNU API, or target hardware.
 
