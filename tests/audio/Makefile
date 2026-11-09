@@ -4,6 +4,7 @@ CFLAGS ?= -std=c11 -Wall -Wextra -Werror -pedantic
 AUDIO_DIR := ../../drivers/audio
 RING_TEST := test_pcm_ring
 STREAM_TEST := test_stream
+QUEUE_TEST := test_buffer_queue
 
 .PHONY: all test clean
 
@@ -15,9 +16,13 @@ $(RING_TEST): test_pcm_ring.c $(AUDIO_DIR)/pcm_ring.c $(AUDIO_DIR)/pcm_ring.h
 $(STREAM_TEST): test_stream.c $(AUDIO_DIR)/stream.c $(AUDIO_DIR)/stream.h
 	$(CC) $(CFLAGS) -I$(AUDIO_DIR) $(AUDIO_DIR)/stream.c test_stream.c -o $(STREAM_TEST)
 
-test: $(RING_TEST) $(STREAM_TEST)
+$(QUEUE_TEST): test_buffer_queue.c $(AUDIO_DIR)/buffer_queue.c $(AUDIO_DIR)/buffer_queue.h
+	$(CC) $(CFLAGS) -I$(AUDIO_DIR) $(AUDIO_DIR)/buffer_queue.c test_buffer_queue.c -o $(QUEUE_TEST)
+
+test: $(RING_TEST) $(STREAM_TEST) $(QUEUE_TEST)
 	./$(RING_TEST)
 	./$(STREAM_TEST)
+	./$(QUEUE_TEST)
 
 clean:
-	rm -f $(RING_TEST) $(STREAM_TEST)
+	rm -f $(RING_TEST) $(STREAM_TEST) $(QUEUE_TEST)
