@@ -1,6 +1,6 @@
 # HanoipXNU Driver Architecture (Phase 2)
 
-**Status:** Audio and Wi-Fi architecture proposals documented; portable audio data-path utilities exist and have limited host-side test evidence. No XNU driver adapter or Moto G60 hardware driver has been implemented.
+**Status:** Audio and Wi-Fi architecture proposals documented; portable audio utilities and a hardware-independent Wi-Fi lifecycle state machine with fake-backend tests exist. No XNU driver adapter or Moto G60 hardware driver has been implemented.
 
 This document defines the architecture for investigating audio, Wi-Fi, and Bluetooth support on the Motorola Moto G60 (XT2135-2, `hanoip`). Exact hardware components and some transports remain unknown.
 
@@ -69,7 +69,7 @@ No driver may assume that a resource exists merely because a related Android con
 ## Implementation status
 
 - **Audio:** `drivers/audio/pcm_ring.c` implements a portable bounded byte ring using caller-owned storage. It does not allocate memory, interpret PCM formats, synchronize concurrent access, access hardware, or call XNU APIs. Host tests are in `tests/audio/`.
-- **Wi-Fi:** generic architecture documented in [docs/wifi-architecture.md](wifi-architecture.md); interface proposal in [drivers/wifi/interface.md](../drivers/wifi/interface.md). No generic Wi-Fi code, mock tests, XNU adapter, firmware loader, transport backend, or hardware driver exists.
+- **Wi-Fi:** generic architecture documented in [docs/wifi-architecture.md](wifi-architecture.md); portable lifecycle state machine in [drivers/wifi/state.c](../drivers/wifi/state.c), with host tests in [tests/wifi/](../tests/wifi/). No XNU adapter, firmware loader, transport backend, packet data path, or hardware driver exists.
 - **Bluetooth:** interface design only; no code or hardware backend.
 - **XNU integration:** not started. The repository has not yet pinned a specific XNU source revision, target SDK/build environment, or driver integration model.
 
