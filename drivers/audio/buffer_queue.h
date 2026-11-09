@@ -46,26 +46,25 @@ struct hpx_audio_buffer_queue {
 int hpx_audio_buffer_queue_init(struct hpx_audio_buffer_queue *queue,
                                 struct hpx_audio_buffer *slots,
                                 size_t capacity);
-
-/* Enqueue caller-owned memory. Returns a unique ticket for this submission. */
 int hpx_audio_buffer_submit(struct hpx_audio_buffer_queue *queue,
                             void *data,
                             size_t length,
                             uint64_t *ticket_out);
-
-/* Move the oldest queued buffer to IN_FLIGHT and return its ticket/data. */
 int hpx_audio_buffer_acquire(struct hpx_audio_buffer_queue *queue,
                              uint64_t *ticket_out,
                              void **data_out,
                              size_t *length_out);
-
-/* Complete an in-flight buffer; bytes_transferred may be less than length. */
 int hpx_audio_buffer_complete(struct hpx_audio_buffer_queue *queue,
                               uint64_t ticket,
                               size_t bytes_transferred,
                               int completion_status);
-
-/* Release a completed/error slot so it can be reused. */
+/* Read completion data before releasing the descriptor. */
+int hpx_audio_buffer_get_completion(
+    const struct hpx_audio_buffer_queue *queue,
+    uint64_t ticket,
+    enum hpx_audio_buffer_state *state_out,
+    size_t *bytes_transferred_out,
+    int *completion_status_out);
 int hpx_audio_buffer_release(struct hpx_audio_buffer_queue *queue,
                              uint64_t ticket);
 
