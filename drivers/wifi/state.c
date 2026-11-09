@@ -61,12 +61,14 @@ hpx_wifi_begin_init(struct hpx_wifi_state_data *wifi)
 }
 
 int
-hpx_wifi_mark_ready(struct hpx_wifi_state_data *wifi)
+hpx_wifi_mark_ready(struct hpx_wifi_state_data *wifi,
+                    unsigned int generation)
 {
     if (!hpx_wifi_valid(wifi)) {
         return HPX_WIFI_INVALID_ARGUMENT;
     }
-    if (wifi->state != HPX_WIFI_INITIALIZING) {
+    if (wifi->state != HPX_WIFI_INITIALIZING ||
+        wifi->generation != generation) {
         return HPX_WIFI_INVALID_STATE;
     }
 
@@ -235,12 +237,14 @@ hpx_wifi_suspend_begin(struct hpx_wifi_state_data *wifi)
 }
 
 int
-hpx_wifi_suspend_complete(struct hpx_wifi_state_data *wifi, int result)
+hpx_wifi_suspend_complete(struct hpx_wifi_state_data *wifi,
+                          unsigned int generation, int result)
 {
     if (!hpx_wifi_valid(wifi)) {
         return HPX_WIFI_INVALID_ARGUMENT;
     }
-    if (wifi->state != HPX_WIFI_SUSPENDING) {
+    if (wifi->state != HPX_WIFI_SUSPENDING ||
+        wifi->generation != generation) {
         return HPX_WIFI_INVALID_STATE;
     }
 
@@ -269,12 +273,14 @@ hpx_wifi_resume_begin(struct hpx_wifi_state_data *wifi)
 }
 
 int
-hpx_wifi_resume_complete(struct hpx_wifi_state_data *wifi, int result)
+hpx_wifi_resume_complete(struct hpx_wifi_state_data *wifi,
+                         unsigned int generation, int result)
 {
     if (!hpx_wifi_valid(wifi)) {
         return HPX_WIFI_INVALID_ARGUMENT;
     }
-    if (wifi->state != HPX_WIFI_RESUMING) {
+    if (wifi->state != HPX_WIFI_RESUMING ||
+        wifi->generation != generation) {
         return HPX_WIFI_INVALID_STATE;
     }
 
@@ -288,14 +294,16 @@ hpx_wifi_resume_complete(struct hpx_wifi_state_data *wifi, int result)
 }
 
 int
-hpx_wifi_fail(struct hpx_wifi_state_data *wifi, int error_code)
+hpx_wifi_fail(struct hpx_wifi_state_data *wifi,
+              unsigned int generation, int error_code)
 {
     if (!hpx_wifi_valid(wifi) || error_code == 0) {
         return HPX_WIFI_INVALID_ARGUMENT;
     }
     if (wifi->state == HPX_WIFI_ABSENT ||
         wifi->state == HPX_WIFI_FAILED ||
-        wifi->state == HPX_WIFI_STOPPING) {
+        wifi->state == HPX_WIFI_STOPPING ||
+        wifi->generation != generation) {
         return HPX_WIFI_INVALID_STATE;
     }
 
