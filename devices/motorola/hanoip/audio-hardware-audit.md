@@ -170,9 +170,9 @@ No exact codec or external speaker amplifier should be selected for an XNU imple
 | Two microphone endpoints | Motorola user guide diagrams; Android platform-info lists two built-in microphones | Confirmed at product/configuration level; exact routing unknown |
 | Lower microphone associated with charging board | Third-party XT2135-2 spare-parts listing | Corroborating, not schematic-grade |
 | Qualcomm audio routing backends | Android audio platform XML | Confirmed in inspected Android configuration |
-| Physical MI2S / CDC-DMA / SoundWire wiring | Not yet correlated against exact board schematic | Unknown |
-| Codec IC and revision | Conflicting WCD family references; no exact board-level identification | Unknown |
-| External speaker amplifier | WSA881x module reference only | Unknown |
+| Physical MI2S / CDC-DMA / SoundWire wiring | Hanoip Linux DT overlay configures secondary MI2S pins and RX/TX SoundWire macro paths; physical schematic correlation remains pending | Configured in Linux DT; electrical implementation not independently verified |
+| Codec IC and revision | Hanoip Linux DT explicitly enables a `qcom,wcd937x-codec` node and references WCD937x RX/TX SoundWire slaves | Strong device-tree configuration evidence; exact fitted part/revision still needs board-level corroboration |
+| External speaker amplifier | Hanoip Linux DT configures an `awinic,aw882xx_smartpa` I2C node; WSA speaker path is disabled in that overlay | Strong device-tree configuration evidence; exact fitted part/revision still needs board-level corroboration |
 | Audio power/reset/clock sequencing | Not yet established from exact board schematic and device tree | Unknown |
 | XNU codec/controller driver | No implementation | Not implemented |
 
@@ -194,3 +194,112 @@ Until those steps are complete, keep the hardware-specific XNU audio backend uni
 - XT2135-X G60/G40 schematic/service-manual listing (source lead only; schematic pages not independently verified): https://eletronicabr.com/en/topic/309099-xt2135-x-g60-and-g40-motherboard-service-manual-schematic/
 - XT2135-2 charging connector/microphone spare-part listing (third-party parts evidence): https://www.gsmnet.ro/piese-componente-conectori-incarcare/placa-cu-conector-incarcare-microfon-motorola-moto-g60-service-pack-5p68c18349
 - Linux ASoC codec Kconfig reference (generic driver-family information, not handset identification): https://android.googlesource.com/kernel/common/+/1bd3a76880b2bce017987cf53780b372cf59528e/sound/soc/codecs/Kconfig
+
+
+## 9. Hanoip-specific Linux device-tree audio audit (2026-11-09)
+
+A source pass through the `LineageOS/android_kernel_motorola_sm6150` repository's `lineage-20` branch found Hanoip-specific overlays. This materially improves the evidence compared with generic SoC files and Android mixer XML.
+
+### 9.1 Overlay inclusion chain
+
+The kernel DT build lists three Hanoip overlays:
+
+- `sdmmagpie-hanoip-evt1-overlay.dts`
+- `sdmmagpie-hanoip-dvt1-overlay.dts`
+- `sdmmagpie-hanoip-dvt2-overlay.dts`
+
+Each includes `sdmmagpie-hanoip-common-overlay.dtsi`. That common overlay includes both `sdmmagpie-audio-overlay.dtsi` and `sdmmagpie-hanoi-audio-overlay.dtsi`. The first includes the shared `sm6150-audio-overlay.dtsi`; the second applies Hanoi/Hanoip-specific overrides.
+
+This means the following findings are present in the inspected Hanoip Linux device-tree configuration across those listed overlay variants. It does not prove which overlay or exact board revision corresponds to a particular retail XT2135-2 handset.
+
+### 9.2 Codec configuration: WCD937x
+
+The Hanoip-specific audio overlay:
+
+- sets the `&bolero` codec block to `okay`;
+- enables `&wcd937x_codec`;
+- enables `&wcd937x_rst_gpio`;
+- enables the RX and TX SoundWire GPIO/pinctrl groups;
+- disables the WSA SoundWire GPIO group and WSA speaker-enable groups;
+- disables the WCD934x reset path and legacy Slimbus audio nodes;
+- configures codec mic-bias values of 2800 mV in the Hanoip overlay.
+
+The shared SM6150 audio overlay defines the WCD937x codec node as `compatible = "qcom,wcd937x-codec"`, with separate RX and TX SoundWire slave nodes. It also describes codec supply references and external audio clock references. These are Linux device-tree resource declarations, not a safe XNU initialization sequence.
+
+**Evidence interpretation:** WCD937x is now the leading codec-family candidate in the Hanoip Linux device-tree configuration. This is stronger than module-name inference. Exact silicon marking, board revision, and physical net mapping still need confirmation before implementing a register-level driver.
+
+### 9.3 Secondary MI2S configuration
+
+The Hanoip-specific overlay defines secondary MI2S pin states on the LPI TLMM:
+
+| Signal role in DTS | Pin | Function |
+|---|---:|---|
+| Secondary MI2S clock | GPIO8 | func3 |
+| Secondary MI2S word select | GPIO9 | func3 |
+| Secondary MI2S data 0 | GPIO10 | func4 |
+| Secondary MI2S data 1 | GPIO11 | func2 |
+
+The overlay groups these into `cdc_sec_mi2s_gpios` and attaches that group to `qcom,sec-mi2s-gpios`. It enables the secondary Q6 MI2S DAI node and declares one RX line and two TX lines.
+
+These are concrete pin/function assignments in the Linux DT source. They do not independently prove which external components are connected to each line or whether every listed signal is used by the retail board revision under investigation.
+
+### 9.4 External smart-amplifier configuration
+
+The Hanoip-specific overlay adds an I2C child under `&qupv3_se2_i2c`:
+
+- compatible: `awinic,aw882xx_smartpa`;
+- I2C address: `0x34`;
+- reset GPIO reference: TLMM GPIO43;
+- IRQ GPIO reference: TLMM GPIO91;
+- AFE RX port ID: `0x1002`;
+- AFE TX port ID: `0x1003`.
+
+This is strong evidence that the Hanoip Linux configuration expects an AW882xx-family smart-amplifier device on that I2C controller. The exact AW882xx chip variant, board population, interrupt polarity/trigger interpretation, reset timing, and required firmware/configuration still need independent verification. Do not write an I2C register driver from these properties alone.
+
+### 9.5 SoundWire, DSP, and DMA implications
+
+The shared SM6150 audio DT defines Q6/ADSP audio service nodes, RX/TX codec macro blocks, SoundWire masters/slaves, and a large set of Q6 DAI/CDC-DMA endpoints. The Hanoip overlay enables RX/TX SoundWire paths while disabling the WSA path and Slimbus audio nodes.
+
+This supports a likely architecture with:
+- Qualcomm Q6/ADSP audio services in the Android implementation;
+- WCD937x codec control/data paths over RX/TX SoundWire;
+- a separate secondary MI2S interface configured by the Hanoip overlay;
+- AW882xx smart-amplifier control over I2C, with audio data/processing coordinated through Qualcomm AFE port identifiers.
+
+The precise playback/capture route for each handset endpoint remains to be mapped from the Hanoip mixer XML, codec routing, DSP port configuration, and board schematic. Do not infer that every generic Q6 DAI or CDC-DMA endpoint is enabled or used on Hanoip.
+
+### 9.6 Updated evidence and implementation status
+
+| Item | Current finding | Confidence / next proof |
+|---|---|---|
+| Codec family | WCD937x node explicitly enabled in Hanoip Linux DT | High for DT configuration; verify physical chip marking and exact board revision |
+| Codec digital link | RX/TX SoundWire masters and WCD937x slaves configured | High for DT configuration; map actual board nets |
+| Secondary MI2S | GPIO8–GPIO11 and secondary DAI configured | High for DT configuration; verify schematic connectivity |
+| Smart amplifier | AW882xx-family I2C node at address 0x34 | High for DT configuration; identify exact chip and board population |
+| Amplifier control resources | GPIO43 reset, GPIO91 IRQ, AFE port IDs 0x1002/0x1003 | High for DT property values; electrical behavior and driver protocol not verified |
+| WSA881x speaker path | WSA macro/speaker-enable path disabled in Hanoip overlay | High for this DT overlay; do not treat WSA881x as Hanoip's selected amplifier |
+| Codec rails/clocks | Shared DT contains supply and clock declarations | Configuration evidence only; regulator/clock sequencing and board mapping require review |
+| DSP firmware/calibration | Android vendor dependencies remain incompletely inventoried | Unknown/legal review required |
+| XNU implementation | No XNU controller, DSP, codec, or amplifier backend | Not implemented |
+
+### 9.7 Next source-only tasks
+
+1. Match the exact XT2135-2 board revision to one of the Hanoip EVT/DVT device-tree overlays.
+2. Inspect the actual schematic pages for WCD937x, AW882xx, SoundWire, secondary MI2S, I2C, reset, IRQ, clocks, and supplies.
+3. Trace the Android mixer routes to the now-identified candidate backends and DSP/AFE port IDs.
+4. Inspect the Linux driver sources for the WCD937x and AW882xx compatible strings to document protocols and firmware/calibration dependencies; use them as behavioral references, not code to copy into XNU.
+5. Pin the XNU revision and decide whether a platform-neutral mocked backend is the next implementation step while board-level evidence is being verified.
+
+### 9.8 Kernel source references
+
+All references below point to the inspected `lineage-20` branch of the public LineageOS Motorola SM6150 kernel repository:
+
+- Hanoip EVT1 overlay: https://github.com/LineageOS/android_kernel_motorola_sm6150/blob/lineage-20/arch/arm64/boot/dts/qcom/sdmmagpie-hanoip-evt1-overlay.dts
+- Hanoip DVT1 overlay: https://github.com/LineageOS/android_kernel_motorola_sm6150/blob/lineage-20/arch/arm64/boot/dts/qcom/sdmmagpie-hanoip-dvt1-overlay.dts
+- Hanoip DVT2 overlay: https://github.com/LineageOS/android_kernel_motorola_sm6150/blob/lineage-20/arch/arm64/boot/dts/qcom/sdmmagpie-hanoip-dvt2-overlay.dts
+- Hanoip common overlay include chain: https://github.com/LineageOS/android_kernel_motorola_sm6150/blob/lineage-20/arch/arm64/boot/dts/qcom/sdmmagpie-hanoip-common-overlay.dtsi
+- Hanoip audio overlay: https://github.com/LineageOS/android_kernel_motorola_sm6150/blob/lineage-20/arch/arm64/boot/dts/qcom/sdmmagpie-hanoi-audio-overlay.dtsi
+- Shared SM6150 audio overlay (WCD937x codec, SoundWire nodes and resources): https://github.com/LineageOS/android_kernel_motorola_sm6150/blob/lineage-20/arch/arm64/boot/dts/qcom/sm6150-audio-overlay.dtsi
+- Shared SM6150 audio controller/DAI definitions: https://github.com/LineageOS/android_kernel_motorola_sm6150/blob/lineage-20/arch/arm64/boot/dts/qcom/sm6150-audio.dtsi
+
+These are Linux DT source references. They do not demonstrate an XNU driver, a successful XNU build, or working audio on the target handset.
