@@ -11,6 +11,9 @@ Public Android device-tree repositories group the Moto G60 and Moto G40 Fusion u
 - [TeamWin Moto G40/G60 device configuration](https://github.com/TeamWin/android_device_motorola_hanoip)
 - [motorola-sm6150-devs Android device tree](https://github.com/motorola-sm6150-devs/device_motorola_hanoip)
 - [Archived community Android/Linux kernel tree](https://github.com/Dark-Matter7232/CosmicFresh-Hanoip)
+- [Audio hardware audit](audio-hardware-audit.md)
+- [Wireless interface audit](wireless-interface-audit.md)
+- [Wi-Fi and Bluetooth feasibility plan](wifi-bluetooth-driver-plan.md)
 
 The Android device tree and Linux kernel are references for understanding the existing platform only. They are not XNU source, and this project does not copy or import their code.
 
