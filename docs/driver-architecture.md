@@ -1,12 +1,12 @@
 # HanoipXNU Driver Architecture (Phase 2)
 
-**Status:** Architecture proposal — not implemented, compiled, or tested on hardware.
+**Status:** Architecture defined; first portable audio data-path utility implemented and host-tested. No XNU driver adapter or Moto G60 hardware driver has been implemented.
 
-This document defines a source-only architecture for investigating audio, Wi-Fi, and Bluetooth support on the Motorola Moto G60 (XT2135-2, `hanoip`). It does not claim that the exact hardware components or transports are known.
+This document defines the architecture for investigating audio, Wi-Fi, and Bluetooth support on the Motorola Moto G60 (XT2135-2, `hanoip`). Exact hardware components and some transports remain unknown.
 
 ## Goals
 
-- Define stable XNU-facing subsystem boundaries before implementation.
+- Define stable XNU-facing subsystem boundaries before hardware-specific implementation.
 - Separate hardware-independent policy from device-specific transport and power control.
 - Keep uncertain hardware facts isolated behind capability descriptions.
 - Make unsupported operations fail explicitly rather than silently pretending to work.
@@ -62,44 +62,30 @@ No driver may assume that a resource exists merely because a related Android con
 
 | Subsystem | Generic XNU-facing role | Hardware-specific boundary | Current confidence |
 |---|---|---|---|
-| Audio | PCM stream and device lifecycle abstraction | Codec/amp, DSP, serial audio links, clocks and routing | Android routing evidence only; physical parts unconfirmed |
+| Audio | PCM stream and device lifecycle abstraction | Codec/amp, DSP, serial audio links, clocks and routing | Portable byte-ring core exists; physical parts and XNU adapter unconfirmed |
 | Wi-Fi | Network interface, packet queues, scan/state events | WLAN chipset, host bus, firmware, DMA and power | Exact chipset/host interface unresolved |
 | Bluetooth | Controller transport plus host protocol integration | Controller, UART/USB/other transport, wake and power signals | UART signal names are provisional evidence only |
 
-## Repository organization proposal
+## Implementation status
 
-```text
-drivers/
-  README.md
-  audio/
-    README.md
-    interface.md
-  wifi/
-    README.md
-    interface.md
-  bluetooth/
-    README.md
-    interface.md
-```
-
-These files are architecture specifications, not compilable driver implementations. Keep device-specific evidence in `devices/motorola/hanoip/`.
+- **Audio:** `drivers/audio/pcm_ring.c` implements a portable bounded byte ring using caller-owned storage. It does not allocate memory, interpret PCM formats, synchronize concurrent access, access hardware, or call XNU APIs. Host tests are in `tests/audio/`.
+- **Wi-Fi:** interface design only; no code or hardware backend.
+- **Bluetooth:** interface design only; no code or hardware backend.
+- **XNU integration:** not started. The repository has not yet pinned a specific XNU source revision, target SDK/build environment, or driver integration model.
 
 ## Implementation gates
 
 - **Gate A — evidence:** exact board revision, component identity, transport, and required resources are documented with reliable sources.
 - **Gate B — interface:** API, lifecycle, data ownership, error model, and mocked tests are reviewed.
-- **Gate C — implementation:** code is written against verified XNU APIs and reviewed for concurrency and memory safety.
+- **Gate C — implementation:** code is written against a pinned, verified XNU source/API target and reviewed for concurrency and memory safety.
 - **Gate D — validation:** tests run in a controlled environment; hardware support is claimed only after repeatable target-device tests.
 
-A subsystem stays **Investigating** until its evidence gate is met. A design document alone does not change the hardware-support matrix.
-
-## Current decision
-
-Proceed with interface specifications for audio, Wi-Fi, and Bluetooth. Do not implement hardware register access, firmware loading, or target-device changes until Gate A is satisfied.
+A subsystem stays **Investigating** until its evidence gate is met. A portable utility or successful host build does not establish XNU or hardware support.
 
 ## Related research
 
 - [Hardware support matrix](hardware-support.md)
+- [Audio implementation notes](../drivers/audio/README.md)
 - [Audio hardware audit](../devices/motorola/hanoip/audio-hardware-audit.md)
 - [Wireless interface audit](../devices/motorola/hanoip/wireless-interface-audit.md)
 - [Wi-Fi and Bluetooth feasibility plan](../devices/motorola/hanoip/wifi-bluetooth-driver-plan.md)
