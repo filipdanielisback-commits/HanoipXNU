@@ -6,12 +6,12 @@
 
 ## 1. Target identity
 
-The concrete kernel identifier used for this comparison is from iOS 18 beta build `22A5316k`:
+The concrete kernel identifier used for this comparison is reported in an iOS 18 beta 4 record. That record lists build `22A5316j` and a later revised build `22A5316k`; the exact build-to-kernel pairing is not independently established by the source reviewed here:
 
 - Darwin kernel family: `24.0.0`
 - Reported XNU build: `xnu-11215.0.165.502.1~2`
 
-This is a specific beta build reference, not proof that every iOS 18 release has an identical kernel build. The identifier is reported in a contemporaneous beta-build record; it is not an Apple-published source archive or a source commit.
+This is a beta-generation reference, not proof that every iOS 18 release has an identical kernel build. The identifier is reported in a contemporaneous beta-build record; it is not an Apple-published source archive or a source commit.
 
 ## 2. Public Apple source comparison
 
