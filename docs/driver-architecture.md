@@ -1,6 +1,6 @@
 # HanoipXNU Driver Architecture (Phase 2)
 
-**Status:** Architecture defined; first portable audio data-path utility implemented and host-tested. No XNU driver adapter or Moto G60 hardware driver has been implemented.
+**Status:** Audio and Wi-Fi architecture proposals documented; portable audio data-path utilities exist and have limited host-side test evidence. No XNU driver adapter or Moto G60 hardware driver has been implemented.
 
 This document defines the architecture for investigating audio, Wi-Fi, and Bluetooth support on the Motorola Moto G60 (XT2135-2, `hanoip`). Exact hardware components and some transports remain unknown.
 
@@ -40,7 +40,7 @@ Platform resources: interrupts, DMA, memory, clocks, power
 Moto G60 hardware (exact parts and wiring still under audit)
 ```
 
-The diagram is conceptual. It is not a claim that these services or adapters currently exist in this repository.
+The diagram is conceptual. It is not a claim that these services or adapters currently exist in the repository.
 
 ## Common driver contract
 
@@ -63,13 +63,13 @@ No driver may assume that a resource exists merely because a related Android con
 | Subsystem | Generic XNU-facing role | Hardware-specific boundary | Current confidence |
 |---|---|---|---|
 | Audio | PCM stream and device lifecycle abstraction | Codec/amp, DSP, serial audio links, clocks and routing | Portable byte-ring core exists; physical parts and XNU adapter unconfirmed |
-| Wi-Fi | Network interface, packet queues, scan/state events | WLAN chipset, host bus, firmware, DMA and power | Exact chipset/host interface unresolved |
+| Wi-Fi | Network interface, control plane, bounded packet queues and link state | WLAN chipset, verified host transport, firmware, DMA and power | Architecture documented; exact chipset/host interface unresolved |
 | Bluetooth | Controller transport plus host protocol integration | Controller, UART/USB/other transport, wake and power signals | UART signal names are provisional evidence only |
 
 ## Implementation status
 
 - **Audio:** `drivers/audio/pcm_ring.c` implements a portable bounded byte ring using caller-owned storage. It does not allocate memory, interpret PCM formats, synchronize concurrent access, access hardware, or call XNU APIs. Host tests are in `tests/audio/`.
-- **Wi-Fi:** interface design only; no code or hardware backend.
+- **Wi-Fi:** generic architecture documented in [docs/wifi-architecture.md](wifi-architecture.md); interface proposal in [drivers/wifi/interface.md](../drivers/wifi/interface.md). No generic Wi-Fi code, mock tests, XNU adapter, firmware loader, transport backend, or hardware driver exists.
 - **Bluetooth:** interface design only; no code or hardware backend.
 - **XNU integration:** not started. The repository has not yet pinned a specific XNU source revision, target SDK/build environment, or driver integration model.
 
@@ -87,5 +87,6 @@ A subsystem stays **Investigating** until its evidence gate is met. A portable u
 - [Hardware support matrix](hardware-support.md)
 - [Audio implementation notes](../drivers/audio/README.md)
 - [Audio hardware audit](../devices/motorola/hanoip/audio-hardware-audit.md)
+- [Wi-Fi architecture](wifi-architecture.md)
 - [Wireless interface audit](../devices/motorola/hanoip/wireless-interface-audit.md)
 - [Wi-Fi and Bluetooth feasibility plan](../devices/motorola/hanoip/wifi-bluetooth-driver-plan.md)
