@@ -40,3 +40,21 @@ make -C tests/wifi test
 ```
 
 These are portable bookkeeping primitives only. They do not transmit or receive packets, define a network packet format, implement DMA or a transport, or establish XNU/Moto G60 compatibility.
+
+
+## Wi-Fi core coordinator
+
+- `core.h` / `core.c` combine the lifecycle state machine with independent bounded TX and RX queues.
+- Lifecycle operations are exposed through coordinator wrappers so packet admission and teardown policy use one shared state.
+- TX submissions and backend acquisitions require `LINK_UP`. RX buffers may be posted/acquired in `READY` or `LINK_UP`.
+- Failure and stop reject new work and cancel descriptors that are still queued. In-flight descriptors are not declared stopped; the backend must confirm their completion after it has safely quiesced the relevant operation.
+- Detach is rejected until queued, in-flight, and completed descriptor counts are all zero. Completed/cancelled descriptors must be inspected and released by the caller.
+- Access remains caller-serialized. The caller owns descriptor storage and packet buffers; the coordinator does not allocate, copy, free, map, lock, perform I/O, or call XNU.
+
+Run all portable Wi-Fi tests, including coordinator integration:
+
+```sh
+make -C tests/wifi test
+```
+
+The coordinator is still a portable bookkeeping layer. It is not a network interface, packet transport, chipset backend, firmware implementation, or working Moto G60/XNU driver.
