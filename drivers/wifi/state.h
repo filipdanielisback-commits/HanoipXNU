@@ -45,11 +45,12 @@ int hpx_wifi_state_init(struct hpx_wifi_state_data *wifi);
 /* Device lifecycle. */
 int hpx_wifi_discover(struct hpx_wifi_state_data *wifi);
 int hpx_wifi_begin_init(struct hpx_wifi_state_data *wifi);
-int hpx_wifi_mark_ready(struct hpx_wifi_state_data *wifi);
+int hpx_wifi_mark_ready(struct hpx_wifi_state_data *wifi,
+                       unsigned int generation);
 int hpx_wifi_begin_stop(struct hpx_wifi_state_data *wifi);
 int hpx_wifi_detach(struct hpx_wifi_state_data *wifi);
 
-/* Scan lifecycle. A request ID must be nonzero and unique while pending. */
+/* Scan lifecycle. IDs must be nonzero and not reused within a generation. */
 int hpx_wifi_scan_begin(struct hpx_wifi_state_data *wifi,
                         unsigned int request_id);
 int hpx_wifi_scan_complete(struct hpx_wifi_state_data *wifi,
@@ -70,12 +71,15 @@ int hpx_wifi_disconnect_complete(struct hpx_wifi_state_data *wifi,
 
 /* Suspend/resume are state-only; backend must confirm each operation. */
 int hpx_wifi_suspend_begin(struct hpx_wifi_state_data *wifi);
-int hpx_wifi_suspend_complete(struct hpx_wifi_state_data *wifi, int result);
+int hpx_wifi_suspend_complete(struct hpx_wifi_state_data *wifi,
+                              unsigned int generation, int result);
 int hpx_wifi_resume_begin(struct hpx_wifi_state_data *wifi);
-int hpx_wifi_resume_complete(struct hpx_wifi_state_data *wifi, int result);
+int hpx_wifi_resume_complete(struct hpx_wifi_state_data *wifi,
+                             unsigned int generation, int result);
 
 /* Fatal error from a verified backend/transport event; error must be nonzero. */
-int hpx_wifi_fail(struct hpx_wifi_state_data *wifi, int error_code);
+int hpx_wifi_fail(struct hpx_wifi_state_data *wifi,
+                  unsigned int generation, int error_code);
 
 /* Read-only status snapshot. */
 int hpx_wifi_get_status(const struct hpx_wifi_state_data *wifi,
