@@ -245,7 +245,7 @@ No gate is considered passed by documentation alone. No phone flashing or device
 
 ## 12. Portable core implemented
 
-The first hardware-independent slice is implemented in `drivers/wifi/state.h` and `drivers/wifi/state.c`. It models discovery, initialization, ready, scan, connection, link, disconnect, suspend/resume, failure, stop, and detach. Scan/connect/disconnect completions require both a request ID and the current device-generation token, so stale asynchronous completions from a previous attachment are rejected.
+The first hardware-independent slice is implemented in `drivers/wifi/state.h` and `drivers/wifi/state.c`. It models discovery, initialization, ready, scan, connection, link, disconnect, suspend/resume, failure, stop, and detach. Initialization, fatal-error, scan/connect/disconnect, and suspend/resume completions require the current device-generation token; scan/connect/disconnect also require a matching request ID. This rejects stale asynchronous completions from a previous attachment.
 
 The caller must serialize access and call completion functions only after backend confirmation. The module performs no I/O, allocation, locking, firmware loading, packet transfer, or XNU calls. Deterministic tests live in `tests/wifi/` and run with `make -C tests/wifi test`; they test the portable logic only, not a real backend or hardware.
 
