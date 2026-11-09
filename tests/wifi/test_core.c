@@ -114,6 +114,37 @@ test_stop_cancels_queued_and_waits_for_drain(void)
 }
 
 static void
+test_disconnect_cancels_unsent_tx(void)
+{
+    struct hpx_wifi_core core;
+    struct hpx_wifi_packet tx_slots[2], rx_slots[1];
+    unsigned char tx[24];
+    uint64_t ticket;
+    uint32_t generation;
+    enum hpx_wifi_packet_state packet_state;
+    size_t bytes;
+    int status;
+
+    assert(hpx_wifi_core_init(&core, tx_slots, 2, rx_slots, 1) == HPX_WIFI_CORE_OK);
+    assert(hpx_wifi_core_discover(&core) == HPX_WIFI_OK);
+    generation = (uint32_t)core.lifecycle.generation;
+    assert(hpx_wifi_core_begin_init(&core) == HPX_WIFI_OK);
+    assert(hpx_wifi_core_mark_ready(&core, generation) == HPX_WIFI_OK);
+    assert(hpx_wifi_core_connect_begin(&core, 9) == HPX_WIFI_OK);
+    assert(hpx_wifi_core_connect_complete(&core, generation, 9, 0) == HPX_WIFI_OK);
+    assert(hpx_wifi_core_tx_submit(&core, tx, sizeof(tx), &ticket) == HPX_WIFI_PACKET_OK);
+    assert(hpx_wifi_core_disconnect_begin(&core, 10) == HPX_WIFI_OK);
+    assert(hpx_wifi_core_packet_get_completion(&core, HPX_WIFI_PACKET_TX, ticket,
+                                               &packet_state, &bytes, &status) ==
+           HPX_WIFI_PACKET_OK);
+    assert(packet_state == HPX_WIFI_PACKET_ERROR &&
+           status == HPX_WIFI_CORE_CANCELLED);
+    assert(hpx_wifi_core_packet_release(&core, HPX_WIFI_PACKET_TX, ticket) ==
+           HPX_WIFI_PACKET_OK);
+    assert(hpx_wifi_core_disconnect_complete(&core, generation, 10, 0) == HPX_WIFI_OK);
+}
+
+static void
 test_failure_cancels_queued(void)
 {
     struct hpx_wifi_core core;
@@ -158,6 +189,7 @@ main(void)
     test_lifecycle_gates_and_packet_flow();
     test_stop_cancels_queued_and_waits_for_drain();
     test_failure_cancels_queued();
+    test_disconnect_cancels_unsent_tx();
     test_distinct_descriptor_storage_required();
     puts("wifi core coordinator tests: ok");
     return 0;
