@@ -58,6 +58,10 @@ int hpx_audio_buffer_complete(struct hpx_audio_buffer_queue *queue,
                               uint64_t ticket,
                               size_t bytes_transferred,
                               int completion_status);
+/* Convert every still-queued descriptor to ERROR; status must be nonzero. */
+int hpx_audio_buffer_cancel_queued(struct hpx_audio_buffer_queue *queue,
+                                   int completion_status,
+                                   size_t *cancelled_out);
 /* Read completion data before releasing the descriptor. */
 int hpx_audio_buffer_get_completion(
     const struct hpx_audio_buffer_queue *queue,
