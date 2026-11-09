@@ -1,6 +1,6 @@
 # HanoipXNU Wi-Fi Architecture
 
-**Status:** Architecture proposal plus portable lifecycle state machine and fake-backend host tests. No XNU Wi-Fi driver, firmware loader, network interface, or hardware backend is implemented.
+**Status:** Architecture proposal, portable lifecycle state machine, bounded packet descriptor queues, and host tests. No packet I/O, XNU Wi-Fi driver, firmware loader, network interface, or hardware backend is implemented.
 **Target:** Motorola Moto G60 XT2135-2 (`hanoip`)
 **Review date:** 2026-11-09
 
