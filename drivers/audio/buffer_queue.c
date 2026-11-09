@@ -176,6 +176,37 @@ hpx_audio_buffer_complete(struct hpx_audio_buffer_queue *queue,
 }
 
 int
+hpx_audio_buffer_cancel_queued(struct hpx_audio_buffer_queue *queue,
+                               int completion_status,
+                               size_t *cancelled_out)
+{
+    size_t i;
+    size_t cancelled = 0;
+
+    if (!hpx_audio_queue_valid(queue) || completion_status == 0 ||
+        cancelled_out == 0) {
+        return HPX_AUDIO_QUEUE_INVALID_ARGUMENT;
+    }
+
+    for (i = 0; i < queue->capacity; ++i) {
+        struct hpx_audio_buffer *slot = &queue->slots[i];
+
+        if (slot->state != HPX_AUDIO_BUFFER_QUEUED) {
+            continue;
+        }
+        slot->bytes_transferred = 0;
+        slot->completion_status = completion_status;
+        slot->state = HPX_AUDIO_BUFFER_ERROR;
+        queue->queued_count--;
+        queue->completed_count++;
+        cancelled++;
+    }
+
+    *cancelled_out = cancelled;
+    return HPX_AUDIO_QUEUE_OK;
+}
+
+int
 hpx_audio_buffer_get_completion(
     const struct hpx_audio_buffer_queue *queue,
     uint64_t ticket,
