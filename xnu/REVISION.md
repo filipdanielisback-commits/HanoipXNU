@@ -1,7 +1,5 @@
 # Upstream XNU revision record
 
-<badge-placeholder>
-
 - Upstream: https://github.com/apple-oss-distributions/xnu
 - Selected tag: **not selected**
 - Immutable commit: **not selected**
