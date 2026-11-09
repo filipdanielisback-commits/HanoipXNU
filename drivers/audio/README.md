@@ -14,11 +14,11 @@ They perform no hardware I/O, memory allocation, DMA, codec control, DSP communi
 
 The queue metadata array and audio data buffers are caller-owned. A successful submit transfers the buffer to the queue contract: callers must not modify, free, or reuse that buffer until its completion has been released.
 
-Each submission receives a 64-bit ticket. The ticket identifies one queue slot generation, so a late completion for an already released submission is rejected as stale. The queue supports bounded submission, FIFO acquisition, explicit completion with transferred-byte count and status, and release for slot reuse.
+Each submission receives a 64-bit ticket. The ticket identifies one queue slot generation, so a late completion for an already released submission is rejected as stale. The queue supports bounded submission, FIFO acquisition, explicit completion with transferred-byte count and status, querying completion details, and release for slot reuse.
 
 The caller must serialize all queue operations. This first version permits one or more buffers to be marked in flight, but it does not schedule hardware, start DMA, perform cache maintenance, or guarantee playback ordering at a device. A future backend must define those details against verified hardware and XNU APIs.
 
-A completion status of zero marks a buffer COMPLETE; a nonzero status marks it ERROR. Completion byte counts larger than the submitted length are rejected. Completed/error descriptors remain occupied until explicitly released.
+A completion status of zero marks a buffer COMPLETE; a nonzero status marks it ERROR. Completion byte counts larger than the submitted length are rejected. Completed/error descriptors remain occupied until explicitly released. Callers should query completion details before releasing a descriptor.
 
 ## Stream lifecycle
 
@@ -47,4 +47,4 @@ From the repository root:
 make -C tests/audio test
 ```
 
-The tests cover ring-buffer behavior, stream state transitions, queue capacity, FIFO acquisition, completion validation, and stale-ticket rejection. Passing them does not validate XNU integration or Moto G60 hardware.
+The tests cover ring-buffer behavior, stream state transitions, queue capacity, FIFO acquisition, completion result reporting, completion validation, and stale-ticket rejection. Passing them does not validate XNU integration or Moto G60 hardware.
