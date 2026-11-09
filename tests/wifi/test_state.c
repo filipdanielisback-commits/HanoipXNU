@@ -88,7 +88,7 @@ main(void)
     assert(hpx_wifi_detach(&wifi) == HPX_WIFI_OK);
 
     assert(hpx_wifi_state_init(0) == HPX_WIFI_INVALID_ARGUMENT);
-    assert(hpx_wifi_scan_begin(&wifi, 0U) == HPX_WIFI_INVALID_STATE);
+    assert(hpx_wifi_scan_begin(&wifi, 5U) == HPX_WIFI_INVALID_STATE);
     assert(hpx_wifi_get_status(&wifi, 0, 0, 0, 0) ==
            HPX_WIFI_INVALID_ARGUMENT);
 
