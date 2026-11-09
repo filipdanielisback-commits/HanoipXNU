@@ -1,16 +1,16 @@
 # Hardware Support Matrix
 
-No target-device hardware feature has been validated by this project.
+No target-device hardware feature has been validated by this project. The entries marked **Investigating** mean that source research exists; they do not mean that a driver works.
 
-| Component | Status | Evidence needed |
+| Component | Status | Evidence / next requirement |
 |---|---|---|
 | Kernel boot | Not tested | Reproducible boot proof and logs |
 | Display | Not tested | Panel identification and driver feasibility |
 | Touchscreen | Not tested | Controller identification and input tests |
 | Storage | Not tested | Controller and filesystem integration research |
-| Wi-Fi | Not tested | Chipset identification, firmware and driver licensing review |
-| Bluetooth | Not tested | Controller and stack compatibility research |
-| Audio | Not tested | Codec, routing, and driver research |
+| Wi-Fi | Investigating | [Wireless interface audit](../devices/motorola/hanoip/wireless-interface-audit.md); exact board host interface and XNU driver remain unknown |
+| Bluetooth | Investigating | [Wireless interface audit](../devices/motorola/hanoip/wireless-interface-audit.md); controller/transport evidence is provisional and no XNU stack exists |
+| Audio | Investigating | [Audio hardware audit](../devices/motorola/hanoip/audio-hardware-audit.md); Android routing/module evidence found, exact physical codec remains unconfirmed |
 | Battery / charging | Not tested | Power-management interface research |
 | Sensors | Not tested | Sensor inventory and interface research |
 | GPU acceleration | Not tested | GPU architecture and driver feasibility |
