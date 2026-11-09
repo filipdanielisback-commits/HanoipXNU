@@ -70,6 +70,7 @@ main(void)
     struct fake_backend backend;
     enum hpx_wifi_state state;
     unsigned int generation;
+    unsigned int old_generation;
     unsigned int pending;
     int error_code;
 
@@ -109,6 +110,20 @@ main(void)
                                &error_code) == HPX_WIFI_OK);
     assert(state == HPX_WIFI_READY);
     assert(error_code == -101);
+
+    assert(hpx_wifi_scan_begin(&backend.wifi, 90U) == HPX_WIFI_OK);
+    old_generation = backend.wifi.generation;
+    assert(hpx_wifi_begin_stop(&backend.wifi) == HPX_WIFI_OK);
+    assert(hpx_wifi_detach(&backend.wifi) == HPX_WIFI_OK);
+
+    assert(fake_backend_probe(&backend) == HPX_WIFI_OK);
+    assert(fake_backend_initialize(&backend) == HPX_WIFI_OK);
+    assert(backend.wifi.generation != old_generation);
+    assert(hpx_wifi_scan_begin(&backend.wifi, 90U) == HPX_WIFI_OK);
+    assert(hpx_wifi_scan_complete(&backend.wifi, old_generation, 90U, 0) ==
+           HPX_WIFI_INVALID_STATE);
+    assert(hpx_wifi_scan_complete(&backend.wifi, backend.wifi.generation,
+                                  90U, 0) == HPX_WIFI_OK);
 
     assert(hpx_wifi_begin_stop(&backend.wifi) == HPX_WIFI_OK);
     assert(hpx_wifi_detach(&backend.wifi) == HPX_WIFI_OK);
