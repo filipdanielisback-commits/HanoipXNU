@@ -2,10 +2,14 @@
 
 This directory is reserved for XNU source references, integration notes, and project-authored patches.
 
-No target-device kernel port or patch set is currently implemented.
+No target-device kernel port, XNU driver adapter, or patch set is currently implemented. The repository has not yet pinned an upstream XNU revision or reproducible kernel build environment.
 
-Before importing upstream code:
-- Record the exact upstream repository and commit.
-- Preserve copyright and license notices.
-- Keep project-specific changes separate and reviewable.
-- Document the target architecture and build environment.
+Before importing or adapting upstream code:
+- Select and record the exact upstream XNU repository and commit.
+- Verify the applicable source license and preserve copyright notices.
+- Document the target architecture, compiler/toolchain, SDK, and build environment.
+- Identify the intended driver integration model and required kernel interfaces.
+- Keep project-specific changes separate, reviewable, and tested.
+- Do not treat macOS driver APIs as automatically available in a standalone or embedded XNU environment.
+
+Portable host-side utilities may be developed and tested independently, but they are not XNU kernel drivers until explicitly integrated and built against the selected XNU target.
