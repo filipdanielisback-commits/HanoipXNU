@@ -5,13 +5,15 @@ This roadmap describes research milestones, not delivery promises. Milestones ma
 ## Pre-alpha 0.1 — Project foundation
 - [x] Create repository overview and research structure
 - [x] Document scope, risks, and current unknowns
+- [x] Collect initial public device-tree and kernel research leads
 - [ ] Record exact XT2135-2 hardware and firmware revisions
-- [ ] Collect authoritative device documentation and source references
+- [ ] Resolve the Qualcomm platform identifier discrepancy
 - [ ] Decide project license after reviewing all included material
 
 ## Pre-alpha 0.2 — Feasibility research
 - [ ] Document the device boot chain and supported boot modes
-- [ ] Identify SoC, memory, display, storage, and peripheral interfaces
+- [x] Identify preliminary family-level SoC, memory, display, and GPU references
+- [ ] Verify exact SoC/platform identity for XT2135-2
 - [ ] Review relevant upstream XNU source and its supported architectures
 - [ ] Identify the gap between upstream XNU and this device's platform
 - [ ] Define an emulator-based proof-of-concept plan
