@@ -286,3 +286,19 @@ These references support research and architectural boundaries only. They do not
 The caller retains ownership of the actual buffer allocation and must keep it valid until release. The queue performs no allocation, copying, freeing, DMA mapping, locking, packet parsing, or I/O. TX and RX use separate queue instances. The caller serializes access. Tickets are monotonic within a queue initialization; queue reinitialization requires prior callbacks to be quiesced, and a new attachment must use a new device generation.
 
 The deterministic packet-queue test covers FIFO acquisition, capacity/back-pressure, invalid arguments and lengths, completion matching, duplicate and stale completion rejection, cancellation, and release. Run it with the existing tests using `make -C tests/wifi test`. These tests validate only queue bookkeeping; they do not prove a packet data path, XNU integration, transport compatibility, or target hardware operation.
+
+
+## 15. Portable Wi-Fi core coordinator
+
+`drivers/wifi/core.h` and `core.c` combine the lifecycle state machine with the bounded TX and RX descriptor queues. The coordinator provides lifecycle wrappers and enforces packet admission rules against the shared lifecycle state:
+
+- TX packets may be submitted and acquired only in `LINK_UP`.
+- RX buffers may be posted and acquired in `READY` or `LINK_UP`, allowing buffers to be prepared before association.
+- Every packet is tagged with the current device generation by the coordinator; completion still must match its queue ticket and generation.
+- Completion and release remain available during `FAILED` and `STOPPING` so outstanding work can be drained.
+- Fatal failure and stop cancel queued TX/RX descriptors with an explicit nonzero status. They do not claim to cancel in-flight operations.
+- Detach is allowed only after all queued, in-flight, and completed descriptors in both directions have been released. The backend must first establish that callbacks and hardware activity are quiesced; software queue counts alone do not prove hardware safety.
+
+The coordinator is caller-serialized and uses caller-owned descriptor arrays and packet buffers. It performs no allocation, copying, freeing, DMA mapping, locking, I/O, interrupt handling, firmware operations, or XNU calls. Its host test is registered as part of `make -C tests/wifi test`.
+
+This is a cohesive portable core milestone, not a hardware driver. In particular, it does not supply timeouts, a scheduler, a backend worker, a real cancellation mechanism for in-flight I/O, or an XNU networking adapter.
