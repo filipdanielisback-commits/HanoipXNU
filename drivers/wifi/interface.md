@@ -1,6 +1,6 @@
 # Wi-Fi Driver Interface Proposal
 
-**Status:** Design only. No XNU Wi-Fi driver exists; chipset and host interface remain unresolved.
+**Status:** Generic lifecycle state machine and fake-backend host tests exist; no XNU Wi-Fi driver exists. Chipset and host interface remain unresolved.
 
 ## Evidence boundary
 
@@ -35,8 +35,14 @@ This is evidence of a Qualcomm WLAN software path in the Android/Linux ecosystem
 - Required DMA/IOMMU constraints and power sequencing.
 - Feasible XNU networking integration point and API version.
 
-## Planned tests
+## Implemented portable core and tests
 
-Mocked tests should cover interface lifecycle, queue bounds, malformed events, timeout/error propagation, cancellation, and suspend/resume state transitions. Hardware tests come only after the transport and resource map are verified.
+`state.h` and `state.c` provide an allocation-free lifecycle state machine for discovery, initialization, ready, scan, connect, link, disconnect, suspend/resume, failure, stop, and detach. Async scan/connect/disconnect completions are checked against both a nonzero request ID and the current device generation to reject stale events. The caller must serialize access and invoke transitions only after backend confirmation.
+
+`tests/wifi/test_state.c` and `tests/wifi/test_fake_backend.c` exercise state transitions and deterministic backend outcomes. Run them with `make -C tests/wifi test`. These tests do not validate a chipset, transport, firmware, XNU API, or target hardware.
+
+## Remaining tests
+
+Future mock tests should cover packet queue bounds, malformed device events, timeout propagation, cancellation, packet ownership, and resource teardown. Hardware tests come only after the transport and resource map are verified.
 
 No Linux module or Android vendor blob should be treated as an XNU driver. Do not infer a host bus from the generic `icnss` node alone.
