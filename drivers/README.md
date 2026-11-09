@@ -6,6 +6,7 @@ This directory contains proposed XNU-facing driver interface specifications for 
 
 ## Subsystems
 
+- [End-to-end audio architecture](../docs/audio-architecture.md)
 - [Audio interface proposal](audio/interface.md)
 - [Wi-Fi interface proposal](wifi/interface.md)
 - [Bluetooth interface proposal](bluetooth/interface.md)
