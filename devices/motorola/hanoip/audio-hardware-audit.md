@@ -126,3 +126,71 @@ No phone modification, flashing, or device-level experimentation is part of this
 - Shared Motorola SM6150 Linux kernel source: https://github.com/LineageOS/android_kernel_motorola_sm6150
 
 These sources support an Android-source audit only. They do not demonstrate an XNU audio driver, a successful HanoipXNU build, or working audio on the target phone.
+
+
+## 6. Physical audio endpoints and board-documentation leads (2026-11-09)
+
+A second source pass found useful endpoint-level evidence, but it still does not settle the codec IC.
+
+### 6.1 Motorola user guide: externally visible audio hardware
+
+Motorola's Moto G60 user guide identifies these audio-related physical endpoints:
+
+- Headset jack.
+- Earpiece.
+- A microphone on the upper/front-side hardware diagram.
+- A second microphone on the rear/bottom-side diagram.
+- Loudspeaker.
+
+This independently supports the existence of headset, earpiece, speaker, and two microphone endpoints at the product level. It does not identify their codec pins, analog/digital interface, amplifier part number, or board revision-specific routing.
+
+### 6.2 XT2135-X schematic/service-manual listing
+
+A public repair-document listing describes a motherboard schematic and service manual for the XT2135-X G60/G40 family, and labels the platform as Hanoi / SM-7150. This is a potentially valuable board-level source lead, but the listing itself is not the schematic contents. The exact XT2135-2 board revision, schematic revision, and audio pages have not been independently inspected or cross-checked against a physical board.
+
+Therefore, do not treat the listing's chipset label as resolving the project's existing `sm6150` versus `SM7150` discrepancy.
+
+### 6.3 Charging-board microphone spare-part listing
+
+A third-party spare-parts catalogue lists a charging connector/microphone board as compatible with Moto G60 XT2135-2. This supports the existence of a microphone associated with the lower charging-board assembly, but it is not a board schematic and does not identify the microphone component, signal interface, or codec connection. It should be treated as corroborating commercial parts evidence only.
+
+### 6.4 Codec-family caution
+
+The Android source tree's WCD934x/WCD937x/WCD938x and WSA881x references remain software configuration clues. Linux kernel Kconfig documentation describes these as distinct codec families with different integration requirements (for example, SoundWire dependencies for WCD937x/WCD938x); generic upstream driver documentation cannot establish which one is populated on this phone.
+
+No exact codec or external speaker amplifier should be selected for an XNU implementation until the board-specific schematic or a trustworthy component marking is tied to the exact XT2135-2 board revision.
+
+## 7. Updated evidence table
+
+| Hardware fact | Current evidence | Status |
+|---|---|---|
+| Headset jack | Motorola user guide hardware diagram | Confirmed at product level |
+| Earpiece | Motorola user guide hardware diagram | Confirmed at product level |
+| Loudspeaker | Motorola user guide hardware diagram | Confirmed at product level |
+| Two microphone endpoints | Motorola user guide diagrams; Android platform-info lists two built-in microphones | Confirmed at product/configuration level; exact routing unknown |
+| Lower microphone associated with charging board | Third-party XT2135-2 spare-parts listing | Corroborating, not schematic-grade |
+| Qualcomm audio routing backends | Android audio platform XML | Confirmed in inspected Android configuration |
+| Physical MI2S / CDC-DMA / SoundWire wiring | Not yet correlated against exact board schematic | Unknown |
+| Codec IC and revision | Conflicting WCD family references; no exact board-level identification | Unknown |
+| External speaker amplifier | WSA881x module reference only | Unknown |
+| Audio power/reset/clock sequencing | Not yet established from exact board schematic and device tree | Unknown |
+| XNU codec/controller driver | No implementation | Not implemented |
+
+## 8. Immediate research gate before XNU hardware code
+
+The next meaningful step is not writing register accesses. It is obtaining and validating board-specific evidence for the exact XT2135-2 revision:
+
+1. Identify the schematic revision and board revision that correspond to XT2135-2.
+2. Inspect only the audio-related schematic pages and extract component reference designators, IC markings/part numbers, bus nets, clocks, reset lines, regulators, interrupts, and speaker/microphone connections.
+3. Cross-reference those nets against the Hanoip device-tree audio nodes and kernel driver bindings.
+4. Reconcile those findings with the Android mixer/backend names and module aliases.
+5. Record any missing proprietary DSP firmware/calibration dependency and its redistribution status.
+
+Until those steps are complete, keep the hardware-specific XNU audio backend unimplemented. Do not guess codec register maps, invent device-tree nodes, or label a generic Qualcomm audio component as the handset's confirmed hardware.
+
+## Additional references
+
+- Motorola Moto G60 User Guide, hardware diagrams (headset jack, earpiece, microphones, speaker): https://help.motorola.com/hc/3260/11/pdf/help-moto-g60-11-global-en-us.pdf
+- XT2135-X G60/G40 schematic/service-manual listing (source lead only; schematic pages not independently verified): https://eletronicabr.com/en/topic/309099-xt2135-x-g60-and-g40-motherboard-service-manual-schematic/
+- XT2135-2 charging connector/microphone spare-part listing (third-party parts evidence): https://www.gsmnet.ro/piese-componente-conectori-incarcare/placa-cu-conector-incarcare-microfon-motorola-moto-g60-service-pack-5p68c18349
+- Linux ASoC codec Kconfig reference (generic driver-family information, not handset identification): https://android.googlesource.com/kernel/common/+/1bd3a76880b2bce017987cf53780b372cf59528e/sound/soc/codecs/Kconfig
