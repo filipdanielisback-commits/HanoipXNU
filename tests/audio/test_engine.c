@@ -72,11 +72,19 @@ main(void)
 
     /* Failure path preserves the error until stop, then permits close. */
     assert(hpx_audio_engine_open(&engine) == HPX_AUDIO_STREAM_OK);
+    assert(hpx_audio_engine_submit(&engine, data_a, sizeof(data_a), &ticket) ==
+           HPX_AUDIO_QUEUE_OK);
     assert(hpx_audio_engine_start(&engine) == HPX_AUDIO_STREAM_OK);
-    assert(hpx_audio_engine_fail(&engine, -42) == HPX_AUDIO_STREAM_OK);
+    assert(hpx_audio_engine_fail(&engine, -42) == HPX_AUDIO_QUEUE_OK);
     assert(hpx_audio_engine_get_status(&engine, &stream_state, &last_error) ==
            HPX_AUDIO_STREAM_OK);
     assert(stream_state == HPX_AUDIO_STREAM_FAILED && last_error == -42);
+    assert(hpx_audio_engine_get_completion(&engine, ticket, &buffer_state,
+                                           &transferred, &completion_status) ==
+           HPX_AUDIO_QUEUE_OK);
+    assert(buffer_state == HPX_AUDIO_BUFFER_ERROR);
+    assert(transferred == 0 && completion_status == -42);
+    assert(hpx_audio_engine_release(&engine, ticket) == HPX_AUDIO_QUEUE_OK);
     assert(hpx_audio_engine_stop(&engine) == HPX_AUDIO_STREAM_OK);
     assert(hpx_audio_engine_close(&engine) == HPX_AUDIO_STREAM_OK);
 
