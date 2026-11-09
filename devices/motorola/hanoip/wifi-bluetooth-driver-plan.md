@@ -49,6 +49,8 @@ Source: https://www.qualcomm.com/wi-fi/products/fastconnect/fastconnect-6200
 
 ## 2. Android software evidence
 
+A follow-on source-level interface audit is documented in [wireless-interface-audit.md](wireless-interface-audit.md). It reviews the shared SM6150 ICNSS WLAN node and explicitly distinguishes generic SoC resources from confirmed Hanoip board wiring.
+
 Inspected source repositories:
 
 - `motorola-sm6150-devs/device_motorola_hanoip`, branch `lineage-20`
