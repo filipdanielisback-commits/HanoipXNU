@@ -23,8 +23,8 @@ struct hpx_wifi_core {
 };
 
 /*
- * The caller owns descriptor arrays and packet buffers. All calls must be
- * serialized. Reinitialization is permitted only after detach and after every
+ * The caller owns distinct TX/RX descriptor arrays and packet buffers. All
+ * calls must be serialized. Reinitialization is permitted only after detach and after every
  * backend callback has been quiesced.
  */
 int hpx_wifi_core_init(struct hpx_wifi_core *core,
