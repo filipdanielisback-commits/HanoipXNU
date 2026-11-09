@@ -6,8 +6,15 @@ This directory contains portable, hardware-independent C components:
 - `stream.h/.c`: stream lifecycle state machine for open, start, pause, resume, stop, close, and error transitions.
 - `buffer_queue.h/.c`: bounded descriptor queue with explicit queued, in-flight, completed, and error states.
 - `engine.h/.c`: coordinator joining stream lifecycle rules to buffer submission, acquisition, completion, and release.
+- `format.h/.c`: direction-aware PCM format validation, frame sizing, period sizing, and buffer alignment checks.
 
 They perform no hardware I/O, memory allocation, DMA, codec control, DSP communication, interrupt handling, locking, or XNU API calls.
+
+## PCM format policy
+
+The format layer models playback and capture separately and currently accepts unsigned 8-bit, signed little-endian 16-bit, packed 24-bit, and signed little-endian 32-bit PCM. Its scaffold validation range is 8 kHz–192 kHz, 1–8 channels, and 1–65536 frames per period. These are generic project policy limits for testing—not measured capabilities of the Moto G60. Hardware support must later be narrowed using the exact codec, board wiring, clocks, and verified driver documentation.
+
+A frame is one sample for each channel. Period and buffer byte calculations use checked size arithmetic. Buffers must contain whole frames and an integer number of configured periods.
 
 **These are not XNU audio drivers.** They are host-testable building blocks whose eventual integration into an XNU target remains to be designed and reviewed.
 
@@ -48,4 +55,4 @@ From the repository root:
 make -C tests/audio test
 ```
 
-The tests cover ring-buffer behavior, stream state transitions, queue capacity, FIFO acquisition, completion result reporting, completion validation, stale-ticket rejection, engine lifecycle coordination, and cleanup of queued buffers after failure. Passing them does not validate XNU integration or Moto G60 hardware.
+The tests cover ring-buffer behavior, stream state transitions, queue capacity, FIFO acquisition, completion result reporting, completion validation, stale-ticket rejection, engine lifecycle coordination, cleanup of queued buffers after failure, PCM format validation, frame/period sizing, and buffer alignment. Passing them does not validate XNU integration or Moto G60 hardware.
