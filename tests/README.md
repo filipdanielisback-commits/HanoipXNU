@@ -27,3 +27,6 @@ make -C tests/wifi test
 These tests exercise lifecycle transitions, request matching, generation-token rejection of stale asynchronous completions, suspend/resume outcomes, failure handling, and a deterministic fake backend. They do not emulate a chipset, firmware, transport, radio, XNU networking, or Moto G60 hardware. The suite now also tests bounded TX/RX packet descriptor queues: FIFO acquisition, capacity, ownership states, generation/ticket matching, stale and duplicate completions, cancellation, and release. These tests validate queue bookkeeping only; they do not transmit or receive network packets. Record actual compiler output and environment when running the full suite locally.
 
 A test on an emulator or a different device must not be presented as proof of Moto G60 support.
+
+
+The Wi-Fi suite now includes a coordinator integration test. It checks lifecycle-gated TX/RX admission, normal RX and TX descriptor flow, queued cancellation on failure/stop, preservation of in-flight work until backend completion, and refusal to detach before every descriptor is released. These remain host-side state/ownership tests and do not exercise hardware, transport, DMA, firmware, or XNU.
