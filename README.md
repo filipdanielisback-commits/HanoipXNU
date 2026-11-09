@@ -19,11 +19,11 @@ HanoipXNU is an independent research project exploring what would be required to
 | XNU integration | Not started |
 | Boot-chain research | Not started |
 | Display and touchscreen | Not tested |
-| Wi-Fi, Bluetooth, audio | Not tested |
+| Wi-Fi, Bluetooth, audio | Investigating; no XNU drivers implemented |
 | Battery and sensors | Not tested |
 | Userland and applications | Not started |
 
-See [ROADMAP.md](ROADMAP.md) for milestones and [docs/hardware-support.md](docs/hardware-support.md) for the support matrix.
+See [ROADMAP.md](ROADMAP.md), [docs/hardware-support.md](docs/hardware-support.md), and the [Phase 2 driver architecture](docs/driver-architecture.md).
 
 ## Device target
 
@@ -50,6 +50,7 @@ HanoipXNU/
 ├── CONTRIBUTING.md
 ├── SECURITY.md
 ├── docs/                  # Architecture, requirements, and research notes
+├── drivers/               # Proposed XNU-facing driver interfaces (design only)
 ├── kernel/                # XNU source integration notes and patches
 ├── bootloader/            # Boot-chain research and experiments
 ├── devices/motorola/hanoip/
@@ -69,8 +70,10 @@ Start with these documents:
 2. [Architecture overview](docs/architecture.md)
 3. [Boot-process research](docs/boot-process.md)
 4. [Hardware support matrix](docs/hardware-support.md)
-5. [Legal and licensing notes](docs/legal.md)
-6. [Roadmap](ROADMAP.md)
+5. [Phase 2 driver architecture](docs/driver-architecture.md)
+6. [Driver interface proposals](drivers/README.md)
+7. [Legal and licensing notes](docs/legal.md)
+8. [Roadmap](ROADMAP.md)
 
 At this stage, work should be limited to source review, documentation, and safe development-environment setup. Use an emulator for early experiments wherever practical. Keep the phone on its known-working stock software until a tested recovery plan and a validated device-specific procedure exist.
 
