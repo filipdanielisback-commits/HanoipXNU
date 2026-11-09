@@ -19,7 +19,7 @@ Each submission receives a 64-bit ticket. The ticket identifies one queue slot g
 
 The caller must serialize all queue operations. This first version permits one or more buffers to be marked in flight, but it does not schedule hardware, start DMA, perform cache maintenance, or guarantee playback ordering at a device. A future backend must define those details against verified hardware and XNU APIs.
 
-A completion status of zero marks a buffer COMPLETE; a nonzero status marks it ERROR. Completion byte counts larger than the submitted length are rejected. Completed/error descriptors remain occupied until explicitly released. Callers should query completion details before releasing a descriptor.
+A completion status of zero marks a buffer COMPLETE; a nonzero status marks it ERROR. Completion byte counts larger than the submitted length are rejected. Completed/error descriptors remain occupied until explicitly released. Callers should query completion details before releasing a descriptor. On engine failure, buffers that were queued but not yet acquired are converted to ERROR using the failure code, so they can be inspected and released. Buffers already in flight still require an explicit completion report before shutdown.
 
 ## Stream lifecycle
 
