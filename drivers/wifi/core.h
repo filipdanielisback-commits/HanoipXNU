@@ -7,6 +7,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
+enum hpx_wifi_core_result {
+    HPX_WIFI_CORE_OK = 0,
+    HPX_WIFI_CORE_INVALID_ARGUMENT = -1,
+    HPX_WIFI_CORE_INVALID_STATE = -2
+};
+
 #define HPX_WIFI_CORE_CANCELLED (-1001)
 
 struct hpx_wifi_core {
