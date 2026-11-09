@@ -4,7 +4,7 @@ This directory is reserved for device-specific research for the Motorola Moto G6
 
 ## Preliminary identity
 
-Public Android device-tree repositories group the Moto G60 and Moto G40 Fusion under the codename family `hanoip`. A public TeamWin device configuration lists family-level specifications including Snapdragon 732G and Adreno 618. Exact hardware details for this XT2135-2 unit remain to be verified.
+Public Android device-tree repositories group the Moto G60 and Moto G40 Fusion under the codename family `hanoip`. A public TeamWin device configuration lists family-level specifications including Snapdragon 732G and Adreno 618. Exact hardware details for this XT2135-2 hardware revision remain to be verified.
 
 ## Research references
 
@@ -14,6 +14,8 @@ Public Android device-tree repositories group the Moto G60 and Moto G40 Fusion u
 - [Audio hardware audit](audio-hardware-audit.md)
 - [Wireless interface audit](wireless-interface-audit.md)
 - [Wi-Fi and Bluetooth feasibility plan](wifi-bluetooth-driver-plan.md)
+- [Proposed audio, Wi-Fi and Bluetooth driver interfaces](../../drivers/README.md)
+- [Overall Phase 2 driver architecture](../../docs/driver-architecture.md)
 
 The Android device tree and Linux kernel are references for understanding the existing platform only. They are not XNU source, and this project does not copy or import their code.
 
