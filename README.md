@@ -39,7 +39,7 @@ Exact hardware revisions, firmware versions, boot configuration, and partition l
 
 HanoipXNU is an operating-system porting and platform research effort. XNU source availability does not provide the complete iOS operating system. iOS also depends on proprietary frameworks, services, signing infrastructure, and hardware-specific components that are not supplied by the open-source XNU repository.
 
-Accordingly, this project does **not** claim to be an iOS 18 port. Any future Darwin-compatible experiment must be described accurately and must respect the licenses and distribution restrictions of every component. The public Apple XNU source is now being evaluated as the real kernel baseline; no exact iOS 18 source match or reproducible XNU build has been established yet. See [XNU revision record](xnu/REVISION.md).
+Accordingly, this project does **not** claim to be an iOS 18 port. Any future Darwin-compatible experiment must be described accurately and must respect the licenses and distribution restrictions of every component. The public Apple XNU tag `xnu-11215.1.10` is pinned as a reproducible research baseline in the iOS 18 / Darwin 24 version family. It is not a verified exact iOS 18 source match, and no successful reference build has been recorded yet. See the [XNU revision record](xnu/REVISION.md) and [iOS 18 source audit](docs/ios18-xnu-audit.md).
 
 ## Repository layout
 
