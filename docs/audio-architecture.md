@@ -2,7 +2,7 @@
 
 **Status:** Proposed system architecture; design only.  
 **Target:** Motorola Moto G60 XT2135-2 (`hanoip`).  
-**Hardware status:** Exact codec, amplifier, audio bus topology, DSP dependencies, and board revision remain unverified.  
+**Hardware status:** Hanoip Linux DT overlays configure a WCD937x codec path, RX/TX SoundWire, secondary MI2S, and an AW882xx-family smart-amplifier node. Exact retail board revision, physical population/net mapping, and DSP dependencies remain to be verified.  
 **Implementation status:** Portable PCM utilities exist; no XNU adapter or hardware backend exists.
 
 ## 1. Purpose and design rules
@@ -202,7 +202,7 @@ The current portable C utilities require caller serialization and are not a subs
 
 Client PCM -> format validation -> period queue -> backend DMA/transport -> SoC serial audio path -> codec DAC/output route -> amplifier (if present) -> speaker, earpiece, or headset.
 
-Only the external endpoints are confirmed at product level. The codec, bus, amplifier, and exact routing are not yet confirmed for the target board revision.
+Product-level endpoints are confirmed. Hanoip Linux DT configures WCD937x RX/TX SoundWire paths, secondary MI2S, and an AW882xx-family I2C smart amplifier. Exact physical board population, component variant, and endpoint-to-net routing still require schematic corroboration.
 
 ### Capture
 
@@ -218,10 +218,11 @@ Bluetooth audio is a separate system integration: controller transport, Bluetoot
 |---|---|---|
 | Speaker, earpiece, headset jack, microphone endpoints | Motorola product guide | Logical endpoints can be listed as product features; pin routing remains unknown |
 | Android routing identifiers such as `SEC_MI2S_RX`, `RX_CDC_DMA_RX_0`, `TX_CDC_DMA_TX_3` | Android audio platform configuration | Leads for source audit only; not physical bus proof |
-| `SLIMBUS_7_RX/TX` | Android Bluetooth audio routing config | Do not assume a physical Slimbus link until corroborated |
-| WCD934x/WCD937x/WCD938x and WSA881x module references | Android build/init configuration | Candidate driver-family leads only; no part selection |
-| Exact codec and amplifier | Not verified against exact XT2135-2 board revision | Hardware backend blocked |
-| Audio controller node, bus topology, DMA and IRQ | Not fully correlated to exact board schematic | Controller backend blocked |
+| `SLIMBUS_7_RX/TX` | Android Bluetooth audio routing config; Hanoip Linux overlay disables Slimbus audio nodes | Do not assume a physical Slimbus audio link is active |
+| WCD937x codec | Explicitly enabled in Hanoip Linux DT overlay; RX/TX SoundWire slave nodes defined in shared SM6150 audio DT | Leading codec-family candidate; verify physical part marking and board revision |
+| AW882xx smart amplifier | Hanoip Linux DT adds I2C node at 0x34, reset GPIO43, IRQ GPIO91 | Leading amplifier-family candidate; verify exact part and board population |
+| Secondary MI2S | Hanoip overlay configures GPIO8–11 and secondary DAI | Linux DT configuration established; physical net mapping still requires schematic |
+| Audio controller node, bus topology, DMA and IRQ | Q6/ADSP, SoundWire and CDC-DMA endpoints appear in shared SoC DT; Hanoip overlay enables/disables selected paths | Linux reference topology improved; controller/DMA semantics and exact board wiring still require verification |
 | DSP firmware/calibration | Android vendor references; availability/licensing unresolved | DSP integration blocked |
 | XNU source revision and audio framework target | Not pinned | XNU adapter/framework mapping blocked |
 
@@ -255,10 +256,10 @@ Run host tests, mocked backend tests, kernel build/static checks, then controlle
 
 ## 11. Immediate next tasks
 
-1. Obtain or inspect the exact XT2135-2 board schematic pages and establish the board revision.
-2. Reconcile Android audio module aliases, init module list, and actual kernel module build outputs.
-3. Correlate candidate audio controller nodes with the exact board DTS and schematic nets.
+1. Match the handset's exact XT2135-2 board revision to the Hanoip EVT1/DVT1/DVT2 overlay variant.
+2. Inspect schematic pages for WCD937x, AW882xx, SoundWire, secondary MI2S, I2C, reset, IRQ, clocks and supplies.
+3. Trace Android mixer routes to the WCD937x/AW882xx and Q6/AFE endpoints; inventory DSP firmware and calibration dependencies.
 4. Pin the XNU source revision and investigate its available audio driver integration points.
-5. Expand host tests with mocked backend, capability negotiation, cancellation, xrun accounting, and teardown races before any hardware code.
+5. Build a mocked backend and test capability negotiation, cancellation, xrun accounting and teardown before any hardware code.
 
 **Current conclusion:** HanoipXNU now has a portable PCM foundation and a proposed end-to-end audio architecture. It does not yet have an XNU audio adapter, SoC audio controller driver, DSP backend, codec driver, or working audio on the Moto G60.
