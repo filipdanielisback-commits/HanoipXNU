@@ -48,4 +48,4 @@ From the repository root:
 make -C tests/audio test
 ```
 
-The tests cover ring-buffer behavior, stream state transitions, queue capacity, FIFO acquisition, completion result reporting, completion validation, and stale-ticket rejection. Passing them does not validate XNU integration or Moto G60 hardware.
+The tests cover ring-buffer behavior, stream state transitions, queue capacity, FIFO acquisition, completion result reporting, completion validation, stale-ticket rejection, engine lifecycle coordination, and cleanup of queued buffers after failure. Passing them does not validate XNU integration or Moto G60 hardware.
