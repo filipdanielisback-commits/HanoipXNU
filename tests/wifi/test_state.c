@@ -43,6 +43,8 @@ main(void)
     expect_state(&wifi, HPX_WIFI_SCANNING, 1U, 10U, 0);
     assert(hpx_wifi_scan_complete(&wifi, 1U, 11U, 0) ==
            HPX_WIFI_INVALID_STATE);
+    assert(hpx_wifi_scan_complete(&wifi, 2U, 10U, 0) ==
+           HPX_WIFI_INVALID_STATE);
     assert(hpx_wifi_scan_complete(&wifi, 1U, 10U, -7) == HPX_WIFI_OK);
     expect_state(&wifi, HPX_WIFI_READY, 1U, 0U, -7);
 
