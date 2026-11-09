@@ -1,27 +1,50 @@
 # Upstream XNU revision record
 
 - Upstream: https://github.com/apple-oss-distributions/xnu
-- Selected tag: **not selected**
-- Immutable commit: **not selected**
-- Candidate Darwin/iOS family: Darwin 24 / iOS 18 (research target only)
-- Exact iOS 18 XNU source match: **not established**
-- Build environment: **not established**
+- Research baseline tag: `xnu-11215.1.10`
+- Immutable commit: `8d741a5de7ff4191bf97d57b9f54c2f6d4a15585`
+- Commit date: 2024-09-24
+- iOS 18 reference family: Darwin 24 / XNU 11215
+- Exact iOS 18 source match: **not established**
+- Clean reference build: **not yet run; host prerequisites unavailable**
 - Last reviewed: 2026-11-09
 
 ## Selection decision
 
-Do not substitute a newer XNU `main` checkout or a macOS XNU tag and call it the exact iOS 18 kernel. First compare the kernel build identifiers associated with the intended iOS 18 release against Apple-published XNU tags and source commits. Record the precise match or document the delta.
+Pin `xnu-11215.1.10` as the project's **public research baseline** because it is an Apple-published XNU snapshot in the same `11215` version family as the identified iOS 18 reference kernel. This is a source-control pin for reproducible research, not a claim that this snapshot is the exact source used by a particular iOS 18 release.
 
-The public XNU repository is useful primary source for the shared kernel architecture and ARM64 code, but its public source availability does not establish that every iOS 18 platform change, driver, private header, SDK, firmware component, or build dependency is present.
+The identified iOS 18 beta reference is build `22A5316k`, reporting Darwin `24.0.0` and kernel version `xnu-11215.0.165.502.1~2`. The public `xnu-11215.1.10` snapshot is nearby in the 11215 generation, but its version string differs. No evidence found in this audit establishes a one-to-one source match between the public tag and that iOS build.
 
-## Required before pinning
+The newer public `xnu-12377.1.9` snapshot is a later version generation and is not selected as the iOS 18 research baseline.
 
-1. Identify the exact iOS 18 release/build being used as a compatibility reference.
-2. Record its kernel version/build from a trustworthy, independently verifiable source.
-3. Enumerate Apple-published XNU tags/commits in the matching Darwin generation.
-4. Compare version metadata and relevant source changes; do not rely on tag names alone.
-5. Record the selected tag and immutable commit SHA.
-6. Save upstream license and notice references and audit any patch-derived files.
-7. Attempt a clean reference build and record the exact host, compiler, SDK, and result.
+## Provenance
 
-Until these steps are complete, all HanoipXNU work must describe its kernel base as **unselected public XNU source under evaluation**.
+- Tag: https://github.com/apple-oss-distributions/xnu/tree/xnu-11215.1.10
+- Immutable commit: https://github.com/apple-oss-distributions/xnu/commit/8d741a5de7ff4191bf97d57b9f54c2f6d4a15585
+- Apple XNU source README: https://github.com/apple-oss-distributions/xnu/blob/xnu-11215.1.10/README.md
+- iOS 18 beta kernel identifier reference: https://forums.macrumors.com/threads/ios-18-beta-4-bug-fixes-changes-and-improvements.2432049/
+
+## What this pin means
+
+- It identifies a reproducible public XNU source snapshot for source review and reference-build experiments.
+- It does not provide Apple's complete iOS userland, proprietary frameworks, signing services, firmware, private headers, device drivers, or platform configuration.
+- It does not establish that the snapshot can boot on the Moto G60 or that the target hardware is supported.
+- It must not be represented as a working iOS 18 port.
+
+## Separate checkout
+
+Use `sh tools/checkout-xnu.sh` to clone the pinned source into a sibling directory outside this repository. The script verifies the resulting commit SHA. Keep upstream source separate from HanoipXNU-owned patches and documentation.
+
+## Reference build
+
+On a supported macOS development host with Xcode command-line tools and an available macOS SDK, run:
+
+```sh
+sh tools/build-xnu-reference.sh
+```
+
+The script builds the untouched pinned checkout for ARM64 using the public macOS SDK selected by `xcrun`, unless `SDKROOT` is explicitly set. Apple's README also documents `macosx.internal`; that internal SDK is not assumed to be publicly available. A build failure with the public SDK must be recorded as an environment/source-build limitation, not silently worked around by substituting private files.
+
+## Revisit criteria
+
+Reopen this decision if Apple publishes a verifiable XNU source snapshot matching the exact iOS 18 kernel build, or if a better-provenance source archive becomes available. Record the new tag, full commit SHA, source URL, comparison evidence, and build environment before changing the pin.
