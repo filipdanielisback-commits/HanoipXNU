@@ -9,7 +9,7 @@
 
 The caller must serialize access. This module does not perform device discovery, firmware loading, scanning, authentication, packet I/O, DMA, interrupts, power control, or XNU integration. Its transition functions should be called only when the backend has supplied the corresponding confirmation.
 
-The state machine tracks device discovery and initialization, ready/scanning/connecting/link-up/disconnecting, suspend/resume, failure, stop, and detach. Scan and connection requests use nonzero caller-supplied request identifiers, and asynchronous completions must carry the device generation token to reject stale events from an earlier attachment. A successful connect completion represents a confirmed backend result; the state machine does not create connectivity itself.
+The state machine tracks device discovery and initialization, ready/scanning/connecting/link-up/disconnecting, suspend/resume, failure, stop, and detach. Scan and connection requests use nonzero caller-supplied request identifiers, and asynchronous completions must carry the device generation token to reject stale events from an earlier attachment. Initialization, failure, scan/connect/disconnect, and suspend/resume completions are generation-checked. Request IDs must not be reused within a device generation. A successful connect completion represents a confirmed backend result; the state machine does not create connectivity itself.
 
 ## Host tests
 
