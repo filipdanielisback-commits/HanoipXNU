@@ -288,4 +288,3 @@ hpx_wifi_packet_completed(const struct hpx_wifi_packet_queue *queue)
     return hpx_wifi_packet_queue_valid(queue) ? queue->completed_count : 0U;
 }
 
-#endif
