@@ -33,6 +33,14 @@ hpx_wifi_core_queue_const(const struct hpx_wifi_core *core,
 }
 
 static int
+hpx_wifi_core_cancel_tx_queued(struct hpx_wifi_core *core, int status)
+{
+    size_t cancelled;
+
+    return hpx_wifi_packet_cancel_queued(&core->tx_queue, status, &cancelled);
+}
+
+static int
 hpx_wifi_core_cancel_queued(struct hpx_wifi_core *core, int status)
 {
     size_t cancelled;
@@ -133,9 +141,17 @@ int
 hpx_wifi_core_disconnect_begin(struct hpx_wifi_core *core,
                                unsigned int request_id)
 {
-    return hpx_wifi_core_valid(core) ?
-        hpx_wifi_disconnect_begin(&core->lifecycle, request_id) :
-        HPX_WIFI_CORE_INVALID_ARGUMENT;
+    int result;
+
+    if (!hpx_wifi_core_valid(core)) {
+        return HPX_WIFI_CORE_INVALID_ARGUMENT;
+    }
+    result = hpx_wifi_disconnect_begin(&core->lifecycle, request_id);
+    if (result != HPX_WIFI_OK) {
+        return result;
+    }
+    /* Never carry unsent data across a disconnect/reconnect boundary. */
+    return hpx_wifi_core_cancel_tx_queued(core, HPX_WIFI_CORE_CANCELLED);
 }
 
 int
@@ -161,10 +177,14 @@ int
 hpx_wifi_core_suspend_complete(struct hpx_wifi_core *core, uint32_t generation,
                                int result)
 {
-    return hpx_wifi_core_valid(core) ?
-        hpx_wifi_suspend_complete(&core->lifecycle, (unsigned int)generation,
-                                  result) :
-        HPX_WIFI_CORE_INVALID_ARGUMENT;
+    if (!hpx_wifi_core_valid(core)) {
+        return HPX_WIFI_CORE_INVALID_ARGUMENT;
+    }
+    if (result == 0 && hpx_wifi_core_in_flight(core) != 0U) {
+        return HPX_WIFI_CORE_INVALID_STATE;
+    }
+    return hpx_wifi_suspend_complete(&core->lifecycle, (unsigned int)generation,
+                                     result);
 }
 
 int
@@ -178,10 +198,21 @@ int
 hpx_wifi_core_resume_complete(struct hpx_wifi_core *core, uint32_t generation,
                               int result)
 {
-    return hpx_wifi_core_valid(core) ?
-        hpx_wifi_resume_complete(&core->lifecycle, (unsigned int)generation,
-                                 result) :
-        HPX_WIFI_CORE_INVALID_ARGUMENT;
+    int transition_result;
+
+    if (!hpx_wifi_core_valid(core)) {
+        return HPX_WIFI_CORE_INVALID_ARGUMENT;
+    }
+    transition_result = hpx_wifi_resume_complete(&core->lifecycle,
+                                                 (unsigned int)generation,
+                                                 result);
+    if (transition_result != HPX_WIFI_OK) {
+        return transition_result;
+    }
+    if (result != 0) {
+        return hpx_wifi_core_cancel_queued(core, result);
+    }
+    return HPX_WIFI_OK;
 }
 
 int
