@@ -53,7 +53,7 @@ hpx_wifi_core_init(struct hpx_wifi_core *core,
                    struct hpx_wifi_packet *tx_slots, size_t tx_capacity,
                    struct hpx_wifi_packet *rx_slots, size_t rx_capacity)
 {
-    if (core == 0 || tx_slots == 0 || rx_slots == 0 ||
+    if (core == 0 || tx_slots == 0 || rx_slots == 0 || tx_slots == rx_slots ||
         tx_capacity == 0U || rx_capacity == 0U) {
         return HPX_WIFI_CORE_INVALID_ARGUMENT;
     }
