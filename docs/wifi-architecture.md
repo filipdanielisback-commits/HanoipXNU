@@ -302,3 +302,9 @@ The deterministic packet-queue test covers FIFO acquisition, capacity/back-press
 The coordinator is caller-serialized and uses caller-owned descriptor arrays and packet buffers. It performs no allocation, copying, freeing, DMA mapping, locking, I/O, interrupt handling, firmware operations, or XNU calls. Its host test is registered as part of `make -C tests/wifi test`.
 
 This is a cohesive portable core milestone, not a hardware driver. In particular, it does not supply timeouts, a scheduler, a backend worker, a real cancellation mechanism for in-flight I/O, or an XNU networking adapter.
+
+
+Additional coordinator lifecycle rules:
+- Beginning disconnect marks any TX descriptors that have not yet been acquired as cancelled. This prevents unsent data from surviving into a later reconnect. TX already in flight remains owned until its backend completion.
+- A successful suspend completion is rejected while any TX or RX descriptor remains in flight. Queued descriptors may remain parked across suspend and resume.
+- If resume fails and the lifecycle enters `FAILED`, queued TX/RX descriptors are cancelled with the reported nonzero error. In-flight descriptors still require backend-confirmed completion.
